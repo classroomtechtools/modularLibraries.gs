@@ -1,6 +1,6 @@
 # Requests.gs
 
-A modular library that makes external requests with `UrlFetchApp` a cinch.
+A modular library that makes external requests with `UrlFetchApp` a cinch. Code is [here](https://gist.github.com/brainysmurf/1e086df246ad65d36e0b7c0fef11fc5f).
 
 ## Requests.gs Quickstart
 
