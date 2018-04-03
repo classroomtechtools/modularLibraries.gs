@@ -106,7 +106,7 @@ function RequestsPackage_ (config) {
         return zipResult;
       },
       
-      iterPaging: function (rootKey, next, query) {
+      pageByToken: function (rootKey, next, query) {
         next = next || 'nextPageToken';
         query = query || 'pageToken';
         if (typeof rootKey === 'undefined') throw Error('Specify root key');
@@ -691,6 +691,23 @@ function RequestsPackage_ (config) {
 
 { /* creators */ 
 
+  /*
+    https://developers.google.com/apis-explorer/#search/discovery/discovery/v1/discovery.apis.getRest
+  */
+  discovery: function (name, version, category, method) {
+    return this({
+      config: {
+        oauth: 'me',
+        discovery: {
+          name: name,
+          version: version,
+          category: category,
+          method: method
+        }
+      }
+    });
+  },
+  
   runRequest: function () {
     var run = this({
       config: {
