@@ -81,13 +81,13 @@ Other frameworks use the discovery api to interact with other APIs, why not Apps
 ```js
 var createFile = Import.Requests({
   config: {
-       discovery: {
+    discovery: {
     name: 'drive',
         version: 'v3',
         category: 'files',
         method: 'create'
-     },
-     oauth: 'me'
+    },
+    oauth: 'me'
   }
 });
 createFile.post({
