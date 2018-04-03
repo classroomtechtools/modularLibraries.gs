@@ -1,3 +1,11 @@
-#ObjectStore.gs
+# ObjectStore.gs
 
-[Link](https://gist.github.com/brainysmurf/3a348a9061e9c242a73b6e92ea1ba9ce)
+Store very large objects into a cache for later retrieval. Leverages both PropertyService and CacheService for fast implementation.
+
+Originally written to overcome difficulties with concurrent processing.
+
+```js
+store = Import.ObjectStore();
+store.set('key', { /* some large object which is stringified and stored in bunches in CacheServices */ );
+var retrieve = store.get('key');
+```  
