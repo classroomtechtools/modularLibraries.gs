@@ -1,3 +1,16 @@
+# moduleLibraries.gs
+
+moduleLibraries.gs consists of:
+
+- Import.gs, which gives the stack `Import` object
+- Example and sample libraries for illustration purposes
+- Useful, real libraries for use in any apps scripting project
+- Documents the techniques for writing more libraries.
+
+## Quickstart
+
+If all you after are copies of the libraries, simply locate them, and paste them into your project or repo, then access via `Import.NameOfLibrary`. Check the documentation for that library for usage examples.
+
 # Import.gs
 
 Boilerplate code used in the writing of importable, modular libraries in google apps scripts.
