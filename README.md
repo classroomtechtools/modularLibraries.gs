@@ -1,11 +1,11 @@
-# moduleLibraries.gs
+# modularLibraries.gs
 
-moduleLibraries.gs consists of:
+modularLibraries.gs consists of:
 
-- Import.gs, which gives the stack `Import` object
+- Import.gs, which gives the stack the `Import` object, and library registration and "bootstraping"
 - Example and sample libraries for illustration purposes
-- Useful, real libraries for use in any apps scripting project
-- Documents the techniques for writing more libraries.
+- Useful, real libraries (with documentation) for use in any apps scripting project
+- Documentation on techniques for writing more libraries
 
 ## Quickstart
 
