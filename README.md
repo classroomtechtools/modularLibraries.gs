@@ -1,23 +1,22 @@
 # modularLibraries.gs
 
-modularLibraries.gs consists of:
+This repo consists of:
 
-- Import.gs, which gives the stack the `Import` object, and library registration and "bootstraping"
-- Example and sample libraries for illustration purposes
+- Import.gs (below) which adds `Import` global object to the project
+- Sample libraries and documentation for writing libraries that can be imported via the `Import.NameOfLibrary()`
 - Useful, real libraries (with documentation) for use in any apps scripting project
-- Documentation on techniques for writing more libraries
 
 ## Quickstart
 
-If all you after are copies of the libraries, simply locate them, and paste them into your project or repo, then access via `Import.NameOfLibrary`. Check the documentation for that library for usage examples.
+The libraries can be found in the repo — all that is needed is copying and pasting into your project, and access them via `Import.NameOfLibrary()`. Check the documentation for that library for usage examples.
 
 # Import.gs
 
-Boilerplate code used in the writing of importable, modular libraries in google apps scripts.
+Import.gs is boilerplate code that is to be placed at the top of a file in which a library is defined.
 
 ## Import.gs Quickstart
 
-Copy this boilerplate into a script file in your project. The first line is the magic, explained later:
+This is the boilerplate code used in writing libraries, and lets you use `Import.NameOfLibrary()` elsewhere. The first line is the magic, explained later:
 
 ```js
 (function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
@@ -39,10 +38,6 @@ function Package_ (config) {
 );
 ```
 
-Write your library code as properties on the returned object in the `Package_` method (or return a function with a constructor, or whatever). The helper object builds upon the library instance, and creators object builds upon importable class. They are both optional.
-
-In the end you'll have a `Import.NameOfLibrary` invokable object that creates an instance of your library. It contains all the methods you defined in the returned object, and optionally the helpers. The creators are built upon `Import.NameOfLibrary` itself.
-
 Then, in another file:
 
 ```js
@@ -60,13 +55,58 @@ function myFunction () {
   Import.NameOfLibrary({base: obj, attr: 'lib');
   obj.lib.doSomething();
    
-   // Sigh. Yes you can just add it to the global namespace:
+   // Yes you can pollute the global namespace to your heart's content (but not recommended):
    Import.NameOfLibrary({base: 'global', attr: 'Lib'});
    Lib.doSomething();
 }
 ```
 
-In other words, the magic line 1 handles the startup sequence required to give the project environment an `Import` object, whose properties represent methods that create instances of the library. That object can also have methods that assist with library creation.
+## Import API
+
+```js
+// Import locally to a variable:
+var lib = Import.NameOfLibrary();
+lib.doSomething();
+
+// Import onto an object
+var app = {};
+Import.NameOfLibrary({
+	base: app,
+	attr: 'library'
+});
+
+// Import into global namespace
+Import.NameOfLibrary({
+	namespace: 'App.library'
+});
+App.library.doSomething();
+
+// Import into a global variable
+Import.NameOfLibrary({
+	base: 'global',
+	attr: 'Library'
+});
+Library.doSomething();
+
+// Pass configuration (values dependent on library)
+Import.NameOfLibrary({
+	namespace: 'App.library',
+	config: {
+		lang: 'en'
+	}
+});
+App.library.doSomething();
+```
+
+## Writing a Library
+
+Using the boilerplate framework, you can write very simple or complex libraries for use throughout your project, accessed via `Import`.
+
+The returned object from the `Package_` method is what is returned to the user via `Import.NameOfLibrary()`. This can be a regular javascript object or a function constructor, or whatever. The returned object is the primary means of exposing functionality.
+
+More sophisticated libraries may wish to define methods such as `Import.NameOfLibrary.new_`, which presents a way for common configuration options to be accessible in one call. Inside this "creator" method, you may return an object from `this()`, which is identical to the end user using `Import.NameOfLibrary()`.
+
+Independent "helper" methods can also be written inside the library that are independent of the returned object  and can be used throughout the library code itself (but is not accessible outside). Inside a helper method, `this` is a reference to 
 
 ## Example Hello World Library
 
@@ -104,10 +144,6 @@ function PackageCode_ (config) {
     };
   }();  // self-invoking so dev can skip a step
   
-  /* or you could just return regular object
-     it's a library, do whatever you need here  
-  return {  };
-  */
 },
 
 {
@@ -138,15 +174,15 @@ function myFunction () {
 
 Several patterns/features of note:
 
-1. All that the developer needs to do is have every file represent a different library, and they have the `Import` object available anywhere after an endpoint function is invoked (a "myFunction" or trigger). 
-2. The Import object itself has a property for each library. You each library via this property, throughout your application.
+1. Library code in defined all in one file, and in other files the `Import` object is available anywhere after an endpoint function is invoked (a `myFunction` called manually or via trigger).
+2. The `Import` object itself has a property for each library. You access these libraries via this property, throughout your application.
 1. The library consists of whatever you return from inside Package_ and the helper functions.
 2. The first parameter is by convention the `config` object — the idea is that you can pass in an object of key values to represent various settings or options.
-3. You can also pass in infinite number of parameters instead of just one config object, see `params` in the api, if you really need to do that.
-2. You can build upon namespaces; you can write a library that has helper functions that the library needs for its own use, but also accessible to the developer. (You can also write private methods.)
 3. The only globally created in this code is `Import`.
 
-### Unminified Packaging Code
+## Packaging Code
+
+The first line of the library is compressed for sanity, but if you wish to understand how it works, behold:
 
 ```js
 (function (global, name, Package, helpers, creators) {
@@ -166,7 +202,7 @@ Several patterns/features of note:
     if (typeof ret === 'undefined') throw Error("Import error! No library called " + uniqueId);
     return ret;
   };
-  global.Import[name] = function wrapper (args) {
+  Import[name] = function wrapper (args) {
     var wrapped = function (options) {    // TODO: replace spaces with underscores (camelcase?)
       options = options || {};
       options.namespace = options.namespace || false;
@@ -206,8 +242,8 @@ Several patterns/features of note:
 })(this, Package, Helpers, Creators);
 ```
 
-### Minified Packaging Code
+### Compressed Packaging Code
 
 ```js
-(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,Package,Helpers,Creators);
+(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,Package,Helpers,Creators);
 ```
