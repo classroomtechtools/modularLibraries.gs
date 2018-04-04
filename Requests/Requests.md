@@ -4,7 +4,7 @@ A modular library for Google Apps Scripting that makes external requests a cinch
 
 ## Requests.gs Quickstart
 
-Make http requests:
+Grab the [code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Requests/Requests.gs), put into your project, and then make http requests:
 
 ```js
 var requestsLibrary = Import.Requests();
