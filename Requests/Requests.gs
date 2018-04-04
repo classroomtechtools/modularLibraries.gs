@@ -800,7 +800,7 @@ function RequestsPackage_ (config) {
             if (obj.error) {
               throw Error(obj.error.details[0].errorMessage);
             }
-            returned = obj.response.result[0];
+            returned = obj.response.result ? obj.response.result[0] : undefined;
             acc = addCallback(acc, returned);
           });
           return acc;
