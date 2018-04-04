@@ -12,10 +12,10 @@ function RequestsPackage_ (config) {
     return self().get('https://www.googleapis.com/discovery/v1/apis/' + name + '/' + version + '/rest');
   };
 
-  discoverUrl = function (name, version, category, method) {
+  discoverUrl = function (name, version, resource, method) {
     var data;
     data = discovery(name, version).json();
-    return data.baseUrl + data.resources[category].methods[method].path;
+    return data.baseUrl + data.resources[resource].methods[method].path;
   };
 
   config = config || {};
@@ -26,8 +26,8 @@ function RequestsPackage_ (config) {
   config.oauth = config.oauth || false;
   config.basicAuth = config.basicAuth || false;
   config.discovery = config.discovery || null;
-  if (config.discovery && config.discovery.name && config.discovery.version && config.discovery.category && config.discovery.method) {
-    config.baseUrl = discoverUrl(config.discovery.name, config.discovery.version, config.discovery.category, config.discovery.method);
+  if (config.discovery && config.discovery.name && config.discovery.version && config.discovery.resource && config.discovery.method) {
+    config.baseUrl = discoverUrl(config.discovery.name, config.discovery.version, config.discovery.resource, config.discovery.method);
   }
   
   if (config.oauth) {
@@ -694,14 +694,14 @@ function RequestsPackage_ (config) {
   /*
     https://developers.google.com/apis-explorer/#search/discovery/discovery/v1/discovery.apis.getRest
   */
-  discovery: function (name, version, category, method) {
+  discovery: function (name, version, resource, method) {
     return this({
       config: {
         oauth: 'me',
         discovery: {
           name: name,
           version: version,
-          category: category,
+          resource: resource,
           method: method
         }
       }
@@ -715,7 +715,7 @@ function RequestsPackage_ (config) {
         discovery: {
           name: 'script',
           version: 'v1',
-          category: 'scripts',
+          resource: 'scripts',
           method: 'run'
         }
       }
