@@ -20,6 +20,10 @@ function RequestsPackage_ (config) {
 
   config = config || {};
   config.baseUrl = config.baseUrl || "";
+  config.method = typeof config.method !== 'undefined' ? config.method.toLowerCase() : null;
+  if (config.method && ['get', 'put', 'post', 'head', 'options', 'delete_'].indexOf(config.method) === -1) {
+    throw Error("Illegal method passed into Requests");
+  }
   config.body = config.body || {};
   config.headers = config.headers || null;
   config.query = config.query || {};  
@@ -106,7 +110,7 @@ function RequestsPackage_ (config) {
         return zipResult;
       },
       
-      pageByToken: function (rootKey, next, query) {
+      pageByTokens: function (rootKey, next, query) {
         next = next || 'nextPageToken';
         query = query || 'pageToken';
         if (typeof rootKey === 'undefined') throw Error('Specify root key');
@@ -353,7 +357,7 @@ function RequestsPackage_ (config) {
     };
   };
 
-  return {
+  var returnedObject = {
     
     /*
       Perform the same method on a pattern-identifying URL
@@ -445,6 +449,11 @@ function RequestsPackage_ (config) {
       return req;
     },
   };
+  
+  if (config.method) {
+    return returnedObject[config.method];
+  }
+  return returnedObject;
 },
 
 { /* helpers */
@@ -692,7 +701,7 @@ function RequestsPackage_ (config) {
 { /* creators */ 
 
   /*
-    https://developers.google.com/apis-explorer/#search/discovery/discovery/v1/discovery.apis.getRest
+    https://developers.google.com/apis-explorer/#search/discovery/discovery/v1/
   */
   discovery: function (name, version, resource, method) {
     return this({
@@ -707,38 +716,41 @@ function RequestsPackage_ (config) {
       }
     });
   },
-  
-  runRequest: function () {
-    var run = this({
-      config: {
-        oauth: 'me',
-        discovery: {
-          name: 'script',
-          version: 'v1',
-          resource: 'scripts',
-          method: 'run'
-        }
-      }
-    });
+
+  runViaAppsScripts: function () {
+    var run = this.discovery('script', 'v1', 'scripts', 'run');
     return function () {
-      var func, params, request;
-      func = Array.prototype.slice.call(arguments, 0, 1)[0];
-      params = Array.prototype.slice.call(arguments, 1);
+      var devMode, func, params, request;
+      devMode = arguments[0];
+      func = arguments[1];
+      params = arguments[2];
       request = run.post({scriptId: this['Script' + 'App'].getScriptId()}, {
         body: {
           parameters: params,
           'function': func,
-          devMode: true  // change this to false after reaching stable version and deploying executable API;
-                         // developers should do this manually
+          devMode: devMode
         }
       }, false);
       return request;
     }.apply(null, arguments);  // null gives me the global object as 'this'
   },
-
-  runner: function () {
-    var request, response;
-    request = this.runRequest.apply(this, arguments);
+  
+  callMyFunction: function () {
+    var request, response, params;
+    params = [false].concat(Array.prototype.slice.call(arguments));
+    request = this.runViaAppsScripts.apply(this, params);
+    response =request.fetch().json();
+    if (response.error) {
+      Logger.log(response);
+      throw Error("Cannot run function " + response.error.message);
+    }
+    return response.response.result;
+  },
+  
+  callMyFunctionInDevMode: function () {
+    var request, response, params;
+    params = [true].concat(Array.prototype.slice.call(arguments));
+    request = this.runViaAppsScripts.apply(this, params);
     response =request.fetch().json();
     if (response.error) {
       Logger.log(response);
@@ -747,10 +759,20 @@ function RequestsPackage_ (config) {
     return response.response.result;
   },
   
-  concurrently: function (body, addCallback, initValue) {
+  concurrentlyInDevMode: function (/* arguments */) {
+    // take on true so that it is the fourth argument
+    var i, params = Array.prototype.slice.call(arguments);
+    for (var i = arguments.length; i < 3; i++) {
+      params.push(undefined);
+    }
+    params.push(true);
+    return this.concurrently.apply(this, params);
+  },
+  
+  concurrently: function (body, addCallback, initValue, devMode) {
     var self = this;
-    initValue = initValue;
     if (typeof initValue === 'undefined') initValue = [];
+    if (typeof devMode === 'undefined') devMode = false;
     addCallback = addCallback || function (acc, item) {
       acc.push(item);
       return acc;
@@ -759,10 +781,11 @@ function RequestsPackage_ (config) {
       var requests = [];
       return {
         add: function () {
-          var funcName, params;
-          funcName = Array.prototype.slice.call(arguments, 0)[0];
-          params = Array.prototype.slice.call(arguments, 1);
-          requests.push( self.runRequest(funcName, params, null, false).params(true) );
+          var funcName, params, rawRequest;
+          funcName = arguments[0];  // Array.prototype.slice.call(arguments, 0, 1)[0];
+          params = arguments[1];  // Array.prototype.slice.call(arguments, 1);
+          rawRequest = self.runViaAppsScripts(devMode, funcName, params, null, false).params(true);
+          requests.push(rawRequest);
         },
         reset: function () {
           requests = [];
