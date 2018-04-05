@@ -2,13 +2,18 @@
 
 "CacheStore",
 
-function CacheStorePackage_ (global, config) {
+function CacheStorePackage_ (config) {
   config = config || {};
   if (config.expiry === 'max') {
     config.expiry = 21600;
   }
   config.expiry = config.expiry || 600;  // 10 minutes
-  config.jsons = config.jsons || true;
+  config.jsons = typeof config.jsons === 'undefined' ? true : config.jsons;
+  config.which = config.which ? config.which.toLowerCase() : null;
+  if (config.which && ['script', 'document', 'user'].indexOf(config.which) == -1) {
+    throw Error('config.which must be script, document, or user');
+  }
+  
   var scriptProperties = PropertiesService.getScriptProperties();
   var storeMax = parseInt(scriptProperties.getProperty('__max') || "100");
   
@@ -16,11 +21,16 @@ function CacheStorePackage_ (global, config) {
     return { 
       set: function (key, value, expiry) {
         expiry = expiry || config.expiry;
+        if (config.jsons) value = JSON.stringify(value);
         _cacheObj.put(key, value, expiry);
       },
-      get: function (key, value) {
+      setByKeys: function (values, expiry) {
+        expiry = expiry || config.expiry;
+        _cacheObj.putAll(values, expiry);
+      },
+      get: function (key) {
         if (config.jsons) return JSON.parse(_cacheObj.get(key) || 'null');
-        return _cacheObj.get(key, value) || null;
+        return _cacheObj.get(key) || null;
       },
       getByKeys: function (keys) {
         return _cacheObj.getAll(keys);
@@ -34,7 +44,7 @@ function CacheStorePackage_ (global, config) {
     };
   };
 
-  return {
+  var retObj = {
     script: function () {
       return CacheObject(CacheService.getScriptCache());
     },
@@ -45,8 +55,13 @@ function CacheStorePackage_ (global, config) {
       return CacheObject(CacheService.getUserCache());    
     }
   }
+  
+  if (config.which) return retObj[config.which]();
+  return retObj;
 },
 
-{ /* helpers */ }
+{ /* helpers */ },
+
+{}
 
 );

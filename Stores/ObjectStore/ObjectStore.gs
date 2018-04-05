@@ -2,13 +2,24 @@
 
 "ObjectStore",
 
-function ObjectStorePackage_ (global, config) {
+function ObjectStorePackage_ (config) {
   config = config || {};
   config.expiry = config.expiry || 'max';
-  config.which = config.which || 'script';
+  config.which = config.which ? config.which.toLowerCase() : 'script';
   var self = this;
-  var propertyStore = Import('PropertyStore')({jsons:true})[config.which]();
-  var cacheStore = Import('CacheStore')({jsons:true, expiry: config.expiry})[config.which]();  
+  var propertyStore = Import.PropertyStore({
+    config: {
+      jsons: true,
+      which: config.which
+    }
+  });
+  var cacheStore = Import.CacheStore({
+    config: {
+      jsons: false,  // we should take care of this ourselves
+      expiry: config.expiry,
+      which: config.which
+    }
+  });
   
   return {
     delete_: function (key) {
@@ -16,28 +27,50 @@ function ObjectStorePackage_ (global, config) {
       cacheStore.delete_(key);
     },  
     set: function (key, value) {
-      var matches, storeKeys, newStoreKeys;
+      var matches, storeKeys, newValues;
       value = JSON.stringify(value);
       matches = value.match(/.{1,65500}/g);
-      storeKeys = propertyStore.get('storeKeys_'+key) || [];
+      if (matches.length > 999) throw Error("Your object is too rich for my blood. Consider breaking it down further somehow");
+
+      // Update a new hash with values, make one call to cache and properties each
       var charsWritten = 0;
-      newStoreKeys = matches.reduce(function (acc, val, index) {
+      newValues = matches.reduce(function (acc, val, index) {
         var k;
         k = self.normalizeKey(key, index);
-        acc.push(k);
+        acc[k] = val;
         cacheStore.set(k, val);
         charsWritten += val.length;
         return acc;
-      }, []);
-      //Logger.log('#chars written: ' + charsWritten);
-      propertyStore.set('storeKeys_'+key, newStoreKeys);        
+      }, {});
+      cacheStore.setByKeys(newValues);
+      if (value.length !== charsWritten) {
+        throw Error("Not everything was written!");
+      }
+      propertyStore.set('storeKeys_'+key, Object.keys(newValues).sort());
     },
     get: function (key, value, expiry) {
       /* derive possible ones, getAll, get keys, sort them, combine them */
-      var storeKeys, result = '';
+      var storeKeys, result = '', cacheResult;
       storeKeys = propertyStore.get('storeKeys_'+key) || [];
       if (storeKeys.length > 0) {
-        var cacheResult = cacheStore.getByKeys(storeKeys);
+        cacheResult = cacheStore.getByKeys(storeKeys);
+        
+        /* Seeing some issues with some keys not returning in the first request (only for very large requests)!
+           (It is consistently the same keys, not random, which initially made me think I was doing something wrong)
+           Workaround is to simply re-do the request, but that really should be fixed (by Google)  */
+        if (Object.keys(cacheResult).length !== storeKeys.length) {
+          var missingKeys, missing;
+          missingKeys = storeKeys.reduce(function (acc, thisKey) {
+            if (typeof cacheResult[thisKey] === 'undefined') {
+              acc.push(thisKey);
+            }
+            return acc;
+          }, []);
+          missing = cacheStore.getByKeys(missingKeys);
+          for (var k in missing) {
+            cacheResult[k] = missing[k];
+          }
+        }
         Object.keys(cacheResult).sort().forEach(function (k) {
           result += cacheResult[k];
         });
@@ -47,10 +80,11 @@ function ObjectStorePackage_ (global, config) {
         var item = cacheStore.get(self.normalizeKey(key, index));
         while (item && item.length > 0) {
           result += item;
-          item = cacheStore.get(self.normalizeIndex(key, index));
+          item = cacheStore.get(self.normalizeKey(key, index));
           index++;
         }
       }
+
       return JSON.parse(result || 'null');
     },
     append: function (key, listToAppend) {
@@ -67,9 +101,12 @@ function ObjectStorePackage_ (global, config) {
 
 {
   normalizeKey: function (key, number, howMany) {
+    // padding gives us upper theoretical limit, padding with four digits has loooooong run-times
     howMany = howMany || 3;
     return key + (Array(Math.max(howMany - String(number).length + 1, 0)).join(0) + number).toString();
   } 
-}
+},
+
+{}
 
 );

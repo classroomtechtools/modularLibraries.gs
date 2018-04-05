@@ -2,15 +2,19 @@
 
 "PropertyStore",
 
-function PropertyStorePackage_ (global, config) {
+function PropertyStorePackage_ (config) {
   config = config || {};
   config.jsons = config.jsons || false;
+  config.which = config.which ? config.which.toLowerCase() : null;
+  if (config.which && ['script', 'document', 'user'].indexOf(config.which) == -1) {
+    throw Error('config.which must be script, document, or user');
+  }
   
   var PropertyObject = function (_propertyObject) {
     return { 
       set: function (key, value) {
         if (config.jsons) value = JSON.stringify(value);
-        _propertyObject.setProperty(key, value);
+        return _propertyObject.setProperty(key, value);
       },
       get: function (key) {
         var ret;
@@ -20,10 +24,22 @@ function PropertyStorePackage_ (global, config) {
         }
         return ret;
       },
+      getKeys: function () {
+        return _propertyObject.getKeys();
+      },
+      setProperties: function () {
+        return _propertyObject.apply(_propertyObject, arguments);
+      },
+      remove: function (key) {
+        return _propertyObject.deleteProperty(key);
+      },
+      removeAll: function () {
+        return _propertyObject.deleteAllProperties();
+      }
     };
   };
 
-  return {
+  var retObj = {
     script: function () {
       return PropertyObject(PropertiesService.getScriptProperties());
     },
@@ -34,8 +50,13 @@ function PropertyStorePackage_ (global, config) {
       return PropertyObject(PropertiesService.getUserProperties());    
     }
   }
+  
+  if (config.which) return retObj[config.which]();
+  return retObj;
 },
 
-{ /* helpers */ }
+{ /* helpers */ },
+
+{}
 
 );
