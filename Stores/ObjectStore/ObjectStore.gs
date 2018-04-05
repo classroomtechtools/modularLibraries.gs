@@ -7,13 +7,17 @@ function ObjectStorePackage_ (config) {
   config.expiry = config.expiry || 'max';
   config.which = config.which ? config.which.toLowerCase() : 'script';
   var self = this;
-  var propertyStore = Import.PropertyStore({
+  
+  /* we'll use two seperate variables to interface with the cache, since one of them is going be jsons
+     and the other will not, */
+  var keysStore = Import.CacheStore({
     config: {
       jsons: true,
+      expiry: config.expiry,
       which: config.which
     }
   });
-  var cacheStore = Import.CacheStore({
+  var mainStore = Import.CacheStore({
     config: {
       jsons: false,  // we should take care of this ourselves
       expiry: config.expiry,
@@ -23,8 +27,8 @@ function ObjectStorePackage_ (config) {
   
   return {
     delete_: function (key) {
-      propertyStore.delete_('storeKeys_'+key);
-      cacheStore.delete_(key);
+      keysStore.delete_(self.keyStoreKey(key));
+      mainStore.delete_(key);
     },  
     set: function (key, value) {
       var matches, storeKeys, newValues;
@@ -38,22 +42,22 @@ function ObjectStorePackage_ (config) {
         var k;
         k = self.normalizeKey(key, index);
         acc[k] = val;
-        cacheStore.set(k, val);
+        mainStore.set(k, val);
         charsWritten += val.length;
         return acc;
       }, {});
-      cacheStore.setByKeys(newValues);
+      mainStore.setByKeys(newValues);
       if (value.length !== charsWritten) {
         throw Error("Not everything was written!");
       }
-      propertyStore.set('storeKeys_'+key, Object.keys(newValues).sort());
+      keysStore.set(self.keyStoreKey(key), Object.keys(newValues).sort());
     },
     get: function (key, value, expiry) {
       /* derive possible ones, getAll, get keys, sort them, combine them */
       var storeKeys, result = '', cacheResult;
-      storeKeys = propertyStore.get('storeKeys_'+key) || [];
+      storeKeys = keysStore.get(self.keyStoreKey(key)) || [];
       if (storeKeys.length > 0) {
-        cacheResult = cacheStore.getByKeys(storeKeys);
+        cacheResult = mainStore.getByKeys(storeKeys);
         
         /* Seeing some issues with some keys not returning in the first request (only for very large requests)!
            (It is consistently the same keys, not random, which initially made me think I was doing something wrong)
@@ -66,7 +70,7 @@ function ObjectStorePackage_ (config) {
             }
             return acc;
           }, []);
-          missing = cacheStore.getByKeys(missingKeys);
+          missing = mainStore.getByKeys(missingKeys);
           for (var k in missing) {
             cacheResult[k] = missing[k];
           }
@@ -77,10 +81,10 @@ function ObjectStorePackage_ (config) {
       } else {
         // first time, without any putting; might be there if not expired!
         var index = 0;
-        var item = cacheStore.get(self.normalizeKey(key, index));
+        var item = mainStore.get(self.normalizeKey(key, index));
         while (item && item.length > 0) {
           result += item;
-          item = cacheStore.get(self.normalizeKey(key, index));
+          item = mainStore.get(self.normalizeKey(key, index));
           index++;
         }
       }
@@ -104,7 +108,11 @@ function ObjectStorePackage_ (config) {
     // padding gives us upper theoretical limit, padding with four digits has loooooong run-times
     howMany = howMany || 3;
     return key + (Array(Math.max(howMany - String(number).length + 1, 0)).join(0) + number).toString();
-  } 
+  },
+
+  keyStoreKey: function (key) {
+    return '__storeKey:' + key;
+  }
 },
 
 {}
