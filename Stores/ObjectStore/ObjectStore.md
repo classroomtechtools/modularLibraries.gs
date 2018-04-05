@@ -14,7 +14,7 @@ var retrieve = store.get('key');
 
 ## Motivation
 
-Originally written to overcome difficulties with concurrent processing. When using the combination of `UrlFetchAll.fetchAll` and Apps Scripts API (as (Requests.gs)[https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Requests/Requests.md] can do for you), the child script only runs for a minute and then times out. As a workaround, store all the processing into a cache and continue from where you left off. But the built-in CacheService has a limitation of 100kb per key ...
+Originally written to overcome difficulties with concurrent processing. When using the combination of `UrlFetchAll.fetchAll` and Apps Scripts API (as [Requests.gs](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Requests/Requests.md) can do for you), the child script only runs for a minute and then times out. As a workaround, store all the processing into a cache and continue from where you left off. But the built-in CacheService has a limitation of 100kb per key ...
 
 ## Limitations
 
