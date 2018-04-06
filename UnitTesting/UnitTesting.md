@@ -1,60 +1,78 @@
 # UnitTesting.gs
 
-Make unit testing of modular library in apps scripts a cinch.
+Assertion and unit testing of modular libraries.
 
 ## UnitTesting.gs Quickstart
 
 Copy and paste the code, and initialize it so that it is live.
 
 ```js
-Import.UnitTestings.init();  // can be safely executed multiple times during execution
-
-
-
+Import.UnitTesting.init();  // can be safely executed multiple times during execution
+  
+describe("Tests", function () {
+  it("This one fails", function () {
+    assert.equals({
+      comment: 'If it fails, it displays in the log',
+      expected: 'Yes',
+      actual: 'No'
+    });
+  });
+});
 ```
 
 The output (minus log info):
 
 ```
-<{"verb":"Hello","noun":"World"}> (Object)
-<{
-    "verb": "Hello",
-    "noun": "World"
-}> (Object)
-<[
-    "hello",
-    "world"
-]> (Array)
+Tests
+	✘ tests
+		Error: Comment: This one fails  -- Failure: Expected Yes but was No	at pkg.utgs.Utgs:189
+	at pkg.utgs.Utgs:157
+	at pkg.utgs.Utgs:449
+	at test:6
+	at pkg.utgs.Utgs:263
+	at pkg.utgs.Utgs:840
+	at test:5
+	at pkg.utgs.Utgs:263
+	at pkg.utgs.Utgs:823
+	at test:4 (myFunction)
 ```
 
-A more versatile method is also available, `__log__` that allows you to combine objects, and even reference properties:
+List of available assertions. If there is a `{}` that means it is an object with `expected`, `actual` and optional `comment` properties. If `any` can be anything, if `func` must be a function.
 
 ```js
-"{0.print}\n{1.print}".__log__(obj);
-"{0.typeof_} of length {0.length}".__log__(arr);
+assert.equals({})
+assert.true_(any)
+assert.false_(any)
+assert.null_(any);
+assert.notNull(any)
+assert.undefined_(any)
+assert.notUndefined(any);
+assert.NaN_(any);
+assert.notNaN(any);
+assert.evaluatesToTrue(any);
+assert.evaluatesToFalse(any);
+
+assert.arrayEquals({});
+assert.arrayEqualsIgnoringOrder({});
+assert.objectEquals({});
+assert.hashEquals({});
+assert.roughlyEquals({});  // also tolerance property required
+assert.contains({value: any, collection: any});
+
+assert.throwsError(func)
+assert.throwsTypeError(func)
+assert.throwsRangeError(func)
+assert.throwsReferenceError(func)
+
+assert.doesNotThrowError(func)
+
+
 ```
 
-Output: 
+## Unit tests!
 
-```
-<{"verb":"Hello","noun":"World"}> (Object)
-<["hello","world"]> (Array)
-Array of length 2
-```
-
-Under the hood all this is implemented with `String.prototype.format`, which works like so:
-
-```js
-"{hello}, {world}".__format__({hello:'hello', world:'world'});
-```
-
+This package has unit tests on itself, which is also useful to check out how to use it.
 
 ## Motivation
 
-There is a certain premium on being able to log output and reason about one's own code. Stackdriver logging is a massive improvement for the stack in so many ways, but for this individual sitting behind the keyboard there is nothing like having fast ways to do two things:
-
-1. Template strings
-2. Output templated strings and objects to an instant log
-
-It is intended that this library may well be removed from the final product, or even well before that; this is why all the methods have double underlines: It makes them easy to find for removal.
-
+Unit testing is worth it.
