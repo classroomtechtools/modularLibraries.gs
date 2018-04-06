@@ -79,4 +79,4 @@ Unit testing is worth it.
 
 ## Thanks
 
-Much of the original code came from here, with additional refactoring and the additional function assertions.
+Much of the original code came from [GSUnit](https://sites.google.com/site/scriptsexamples/custom-methods/gsunit), with additional refactoring and the additional function assertions.
