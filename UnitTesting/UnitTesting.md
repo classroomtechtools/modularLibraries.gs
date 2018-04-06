@@ -4,7 +4,7 @@ Assertion and unit testing of modular libraries.
 
 ## UnitTesting.gs Quickstart
 
-Copy and paste the code, and initialize it so that it is live.
+Copy and paste the [code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/UnitTesting/UnitTesting.gs), and initialize it so that it is live.
 
 ```js
 Import.UnitTesting.init();  // can be safely executed multiple times during execution
