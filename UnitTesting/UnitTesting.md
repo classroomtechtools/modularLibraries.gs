@@ -76,3 +76,7 @@ This package has unit tests on itself, which is also useful to check out how to 
 ## Motivation
 
 Unit testing is worth it.
+
+## Thanks
+
+Much of the original code came from here, with additional refactoring and the additional function assertions.
