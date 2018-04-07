@@ -723,7 +723,7 @@ function RequestsPackage_ (config) {
       var devMode, func, params, request;
       devMode = arguments[0];
       func = arguments[1];
-      params = arguments[2];
+      params = Array.prototype.slice.call(arguments, 2);
       request = run.post({scriptId: this['Script' + 'App'].getScriptId()}, {
         body: {
           parameters: params,
@@ -783,7 +783,7 @@ function RequestsPackage_ (config) {
         add: function () {
           var funcName, params, rawRequest;
           funcName = arguments[0];  // Array.prototype.slice.call(arguments, 0, 1)[0];
-          params = arguments[1];  // Array.prototype.slice.call(arguments, 1);
+          params = Array.prototype.slice.call(arguments, 1);
           rawRequest = self.runViaAppsScripts(devMode, funcName, params, null, false).params(true);
           requests.push(rawRequest);
         },
