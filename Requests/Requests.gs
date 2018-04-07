@@ -795,10 +795,10 @@ function RequestsPackage_ (config) {
           resps = UrlFetchApp.fetchAll(requests);
           resps.forEach(function (resp, index) {
             var request, obj, returned, tab;
-            request = resp[index];
+            request = requests[index];
             obj = JSON.parse(resp);
             if (obj.error) {
-              throw Error(obj.error.details[0].errorMessage);
+              throw Error(JSON.stringify(obj.error) + " during request: " + JSON.stringify(request));
             }
             returned = obj.response.result ? obj.response.result[0] : undefined;
             acc = addCallback(acc, returned);
