@@ -10,9 +10,8 @@
                            @prop {Array} params: (optional) arguments sent to the entry function
   @throws re-raises error that was raised in execution of body function (unless onError is defined and returns null)
   @throws Error if sent no parameters or more than two
-  @returns returned object from @param body if in embedded mode (two-parameters passed)
   @returns function if in fastory mode (one-parameter passed):
-  @param {Function} body (same as above)
+  @returns result after each stage
 */
 function Package () {
   return function () {
