@@ -6,7 +6,7 @@ Create a block of code in apps scripts that is guaranteed to do something before
 
 ## ContextManager.gs Quickstart
 
-Copy and paste the [code](), and create a context manager that can be used as a block of code.
+Copy and paste the [code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/ContextManager/ContextManager.gs), and create a context manager that can be used as a block of code.
 
 ```js
 var withOpenFile = Import.ContextManager();
