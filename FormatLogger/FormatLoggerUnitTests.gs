@@ -1,5 +1,8 @@
 function testing___log() {
-
+  
+  Import.UnitTesting.init();
+  Import.FormatLogger.initWithLogger(); // can NOT use stackdriver for this, as current testing uses Logger.getLog()
+  
   function getLog_() {
     var log, index;
     log = Logger.getLog();
@@ -15,13 +18,6 @@ function testing___log() {
   */
   if (Logger.getLog() != "")   
     return;
-
-  /* 
-    Sequence of these init is important
-    formatLogger needs to be inited after utgs
-  */
-  Import.UnitTesting.init();
-  Import.FormatLogger.initWithLogger();  // can NOT use stackdriver for this, as current testing uses Logger.getLog()
 
   describe("format, __print__, __pprint__, __log__", function () {
     Logger.clear();

@@ -5,15 +5,16 @@
 function FormatLoggerPackage_ (config) {
   config = config || {};
   config.useLogger = config.useLogger || false;
-  if (config.useLogger)
-    config.loggerObject = Logger;
-  else
-    config.loggerObject = console;
   config.transformers = config.transformers || {};
   config.defaultTransformString = config.defaultTransformString || "{0}";
   config.pprintNewlines = config.pprintNewlines || true;
   config.pprintWhitespace = config.pprintWhitespace || 4;
-
+  PropertiesService.getScriptProperties().setProperty('Import.FormatLogger.__config', JSON.stringify(config))
+  if (config.useLogger)
+    config.loggerObject = Logger;
+  else
+    config.loggerObject = console;
+    
   var global = function gimmeGlobal() { return this; }.apply(null, []);
 
   //  ValueError :: String -> Error
@@ -240,27 +241,36 @@ function FormatLoggerPackage_ (config) {
 {},
 
 {
-  init: function () {
-    this.initWithLogger();
+  init: function (str) {
+    this.initWithLogger(str);
   },
-  initWithLogger: function () {
+  initWithLogger: function (str) {
+    str = str || "<{0}> ({1.typeof_})";
     this({
       config: {
         useLogger: true,
-        defaultTransformString: "<{0}> ({1.typeof_})",
+        defaultTransformString: str,
         pprintNewLines: false
       }
     });
   },
-  initWithStackdriver: function () {
+  initWithStackdriver: function (str) {
+    str = str || "<{0}> ({1.typeof_})";
     this({
       config: {
         useLogger: false,
-        defaultTransformString: "<{0}> ({1.typeof_})",
+        defaultTransformString: str,
         pprintNewLines: false
       }
     });
-  }
+  },
+  withDefaultSettings: function (func) {
+    var oldConfig;
+    oldConfig = JSON.parse(PropertiesService.getScriptProperties().getProperty('Import.FormatLogger.__config') || '{}');
+    this.init("{0}");
+    func.call();
+    this({config: oldConfig});  // oldConfig
+  },
 }
 
 );
