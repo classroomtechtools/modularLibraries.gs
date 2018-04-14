@@ -2,7 +2,7 @@
 function testRunner () {
 
   Import.UnitTesting.init();
-  var contextManager = Import.contextManager();
+  var contextManager = Import.ContextManager();
 
   describe("Meta", function () {
     it("Throws error when three arguments passed", function () {
