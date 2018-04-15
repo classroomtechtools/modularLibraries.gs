@@ -4,8 +4,9 @@
 
 function Package (config) {
   config = config || {};  // config for defaults
-  config.valueInputOption = config.valueInputOption || 'USER_ENTERED';
-  config.dimension = config.dimension || 'ROWS';
+  config.valueInputOption = config.rawInput ? 'RAW' : 'USER_ENTERED';
+  config.valueRenderOption = config.rawOutput ? 'FORMULA' : 'UNFORMATTED_VALUE';
+  config.dimension = config.byRows === false ? 'COLUMNS' : 'ROWS';  // Columns only if sent in byRows = false
   config.keyHeaderRow = config.keyHeaderRow || 0;
   config.destInfo = config.destInfo || [];   // for the form!
   config.spreadsheetResource = config.spreadsheetResource || null;
@@ -37,7 +38,6 @@ function Package (config) {
     FIXME: Instead of using built-in objects, instead use UrlFetch which will streamline this
   */
   var processApiCall = function (err) {
-    err.__pprint__;
     switch (err.details.code) {
       case 400:   // At the moment all of them are error codes with 400 ... BOOO
         throw Error(err.message)
@@ -129,8 +129,9 @@ function Package (config) {
     
     processBuilder: function (obj) {    
       var resolvedRequests;
-      if (obj.newTabRequests.length > 0) {
-        var priorities = obj.newTabRequests.map(function (m) { 
+      if (obj.headerRequests.length > 0) {
+        var priorities;
+        priorities  = obj.headerRequests.map(function (m) { 
           return m[1];
         }).sort()
           .filter(function (value, index, self) {
@@ -139,7 +140,7 @@ function Package (config) {
         );
         priorities.forEach(function (priority) {
           var requests; 
-          requests = obj.newTabRequests.reduce(function (acc, req) {
+          requests = obj.headerRequests.reduce(function (acc, req) {
             var func, requestObj;
             if (req[1] === priority) {
               func = req[0];
@@ -149,15 +150,16 @@ function Package (config) {
             return acc;
           }.bind(this), []);
           if (requests.length > 0) {
+            // Finally, send them up
             this.api.batchUpdate({requests:requests}, this.getId());
             this.updated();
           }
         }.bind(this));
-        obj.newTabRequests = [];
+        obj.headerRequests = [];
       }
       
-      if (obj.preSSRequests.length > 0) {
-        resolvedRequests = obj.preSSRequests.reduce(function (acc, item) {
+      if (obj.bodyRequests.length > 0) {
+        resolvedRequests = obj.bodyRequests.reduce(function (acc, item) {
           var requestObj;
           requestObj = item.call(this);
           acc.push(requestObj);
@@ -169,20 +171,24 @@ function Package (config) {
         }
       }
       
-      if (obj.sRequests.length > 0) {
+      if (obj.valueRequests.length > 0) {
+      
+        // Check for which tabs to clear by looking through requests and inspecting the range property
+        // Thus, only clears tabs that are manipulated in some way, not all tabs
         if (obj._tabsAutoClear) {
-          var allSheets = obj.sRequests.reduce(function (acc, item) {
-            acc.push(item.call(this).range.match(/(.*)!/)[1]);
+          var allSheets = obj.valueRequests.reduce(function (acc, item) {
+            acc.push(item.call(this).range.match(/(.*)!/)[1]);  // resovlve it, and inspect
             return acc;
           }.bind(this), []);
           allSheets.filter(function (i, p, a) {
             return a.indexOf(i) == p;
           }).forEach(function (sheetName) {
-            this.clearTab(sheetName);  // use the 
+            this.clearTab(sheetName);  // add the request to the top
           }.bind(this));
         }
+        
         // resolve the requests
-        resolvedRequests = obj.sRequests.reduce(function (acc, item) {
+        resolvedRequests = obj.valueRequests.reduce(function (acc, item) {
           acc.push(item.call(this));
           return acc;
         }.bind(this), []);
@@ -192,8 +198,8 @@ function Package (config) {
         }, this.getId());
         
       }
-      if (obj.postSSRequests.length > 0) {
-        resolvedRequests = obj.postSSRequests.reduce(function (acc, item) {
+      if (obj.footerRequests.length > 0) {
+        resolvedRequests = obj.footerRequests.reduce(function (acc, item) {
           acc.push(item.call(this));
           return acc;
         }, []);
@@ -213,12 +219,25 @@ function Package (config) {
       return this.api.values.batchUpdate(request, this.getId());
     }),
     
-    getValues: function (range) {
+    getValues: function (range, valueRenderOption) {
+      valueRenderOption = valueRenderOption || config.valueRenderOption
       var response = Sheets.Spreadsheets.Values.get(this.getId(), range, {
         majorDimension: config.dimension,
-        valueRenderOption: "UNFORMATTED_VALUE"
+        valueRenderOption: valueRenderOption
       });
       return response.values || [[]];
+    },
+    
+    getFormattedValues: function (range) {
+      this.getValues(range, 'FORMATTED_VALUE');
+    },
+    
+    getUnformattedValues: function (range) {
+      this.getValues(range, 'UNFORMATTED_VALUE');
+    },
+    
+    getFormulaValues: function (range) {
+      this.getValues(range, 'FORMULA');
     },
     
     getGridValues: function (a1Notation, mode) {
@@ -227,7 +246,7 @@ function Package (config) {
       // If --^ gets fixed, this would be a whole lot better
 
       var response;
-      // NOTE: This api call saves back to this.ss, so no need to get the reponse
+      // NOTE: This api call saves back to this.ss, so no need to get the response
       response = this.api.get(this.getId(), {ranges: a1Notation, fields: "properties,sheets(data(startRow,startColumn,rowData(values("+ mode + "))))"});
       if (!response.sheets) {
         throw Error("No data found, does this sheet exist?");
@@ -656,9 +675,17 @@ function Package (config) {
       };
       return this.valuesBatchUpdate(request);
     },
-      
-    getEffectiveValues: function (range) {
-      return this.getValues(range);
+
+    getFormattedValues: function (range) {
+      return this.getValues(range, 'FORMATTED_VALUE');
+    },
+
+    getUnformattedValues: function (range) {
+      return this.getValues(range, 'UNFORMATTED_VALUE');
+    },
+ 
+    getFormulaValues: function (range) {
+      return this.getValues(range, 'FORMULA_VALUE');
     },
       
     getColumnValues: function (range, column) {
@@ -714,13 +741,19 @@ function Package (config) {
     
     withSession: dbSheetPrototype.ssUpdaterWrapper(Import.ContextManager().call(this, {
       enter: function (obj) {
-        obj.preSSRequests = [];
-        obj.newTabRequests = [];
-        obj.sRequests = [];
-        obj.postSSRequests = [];
+        obj.bodyRequests = [];
+        obj.headerRequests = [];
+        obj.valueRequests = [];
+        obj.footerRequests = [];
         return [obj];
       },
       exit: dbSheetPrototype.processBuilder,
+      onError: function (err, obj) {
+        /* Check to see if it's a TypeError, which probably means that something like
+           session.wrong was used. If not thrown here, results in confusing message later down in the stack */
+        if (err instanceof TypeError)
+          throw TypeError('Session object: ' + err.message);
+      },
       params: function () { return [this.makeRequestBuilder()]; },  // new Session(this)
     })),
     
@@ -894,29 +927,49 @@ function Package (config) {
 },
 
 {  // creators
-  makeTemp: function (title) {
-    title = title || "Temporary";
-    return [this.newWithTitle(title)];
-  },
-  destroyTemp: function (tmp) {
-    /*
-      Interface with the drive api and delete the temporary file
-      Add the oauth scope in the manifest
-    */
-    var global = function () { return this; }.apply(null, []);
-    UrlFetchApp.fetch("https://www.googleapis.com/drive/v3/files/" + tmp.getId(), {
-      headers: {
-        Authorization: "Bearer " + global["Script" + "App"].getOAuthToken(),
-      },
-      method: 'delete',
-      muteHttpExceptions: false
-    });
-  },
-  withTempSpreadsheet: function (func) {
-    Import.ContextManager().apply(this, [func, {enter: this.makeTemp, exit: this.destroyTemp}]);
+
+  withTempSpreadsheet: function (/* arg1, arg2 */) {
+    var func, config;
+    if (arguments.length === 2) {
+      func = arguments[1];
+      config = arguments[0];
+    } else if (arguments.length == 1) {
+      func = arguments[0];
+      config = {};
+    }
+
+    var makeTemp = function (title) {
+      title = title || "Temporary";
+      return [this.new_(title, config)];
+    }.bind(this);
+    
+    var destroyTemp = function (tmp) {
+      /*
+        Interface with the drive api and delete the temporary file
+        Add the oauth scope in the manifest
+      */
+      var global = function () { return this; }.apply(null, []);
+      UrlFetchApp.fetch("https://www.googleapis.com/drive/v3/files/" + tmp.getId(), {
+        headers: {
+          Authorization: "Bearer " + global["Script" + "App"].getOAuthToken(),
+        },
+        method: 'delete',
+        muteHttpExceptions: false
+      });
+    };
+    
+    Import.ContextManager().apply(this, [func, {
+      enter: makeTemp,
+      exit: destroyTemp
+    }]);
   },
   withTempDontDelete: function (func) {
-    Import.ContextManager().apply(this, [func, {enter: this.makeTemp}]);
+    var makeTemp = function (title) {
+      title = title || "Temporary";
+      return [this.new_(title, config)];
+    }.bind(this);
+
+    Import.ContextManager().apply(this, [func, {enter: makeTemp}]);
   },
   
   fromId: function (spreadsheetId, config) {
@@ -925,6 +978,7 @@ function Package (config) {
     return this({config: config});
   },
   fromRange: function (range, config) {
+    config = config || {};
     return this.fromId(range.getSheet().getParent().getId(), config);
   },
   fromProperties: function (resource, config) {
@@ -932,7 +986,9 @@ function Package (config) {
     config.spreadsheetResource = Sheets.Spreadsheets.create(resource);
     return this({config: config});
   },
-  newWithTitle: function (title, config) {
+  new_: function (title, config) {
+    title = title || "Untitled";
+    config = config || {};
     return this.fromProperties({properties: {title: title}}, config);
   },
   fromActiveSpreadsheet: function (config) {

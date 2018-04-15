@@ -5,34 +5,34 @@ function testing_dbsheets() {
   Import.FormatLogger.init();
 
   DBSheets.withTempSpreadsheet(function (tmp) {
-    tmp.withRequestBuilder(function (rb) {
+    tmp.withSession(function (session) {
       // Make tabs that are needed below
-      rb.newTab('newapi')
-        .newTab('calcrows')
-        .newTab('calccols')
-        .newTab('headers')
-        .newTab('Values')
-        .newTab('appends')
-        .newTab('autoclear')
-        .newTab('plugin')
-        .newTab('templates')
-        .newTab('formulatemplates')
-        .newTab('unique')
-        .newTab('uber')
-        .newTab('insert')
-        .newTab('updateCells');
+      session.newTab('newapi')
+             .newTab('calcrows')
+             .newTab('calccols')
+             .newTab('headers')
+             .newTab('Values')
+             .newTab('appends')
+             .newTab('autoclear')
+             .newTab('plugin')
+             .newTab('templates')
+             .newTab('formulatemplates')
+             .newTab('unique')
+             .newTab('uber')
+             .newTab('insert')
+             .newTab('updateCells');
     });
   
-    describe("setValues api with rb.transpose and formulas", function () {
+    describe("setValues api with session.transpose and formulas", function () {
       it("last definition holds, formulas resolve", function () {
         tmp.withSession(function (session) {
           session.setValues('newapi!A1', [['hi', 'there', 'everyone']])
                  .setValues('newapi', 'A2', [['hello']])
                  .setValues('newapi', 4, [['d4', 5, 6, 7]])
-                 .setValues('newapi', 'D4', 'D', rb.transpose([[100, 5, 6, 7]]))
+                 .setValues('newapi', 'D4', 'D', session.utils.transpose([[100, 5, 6, 7]]))
                  .setValues('newapi', 'D8', [['=SUM(D4:D7)']]);
         });
-        var data = tmp.getEffectiveValues('newapi!A1:D8'); 
+        var data = tmp.getUnformattedValues('newapi!A1:D8'); 
         assert.arrayEquals({
           expected: [['hi', 'there', 'everyone'], ['hello'], [], ['d4', 5, 6, 100], ['','','',5], ['','','',6], ['', '','', 7], ['','','', 118]],
           actual: data
@@ -46,8 +46,8 @@ function testing_dbsheets() {
         for (var l = 0; l < 50; l++) {
           longRow.push('hi');
         }
-        tmp.withSession(function (rb) {
-          rb.newTab('NewTab')
+        tmp.withSession(function (session) {
+          session.newTab('NewTab')
             .newTab('AnotherTab')
             .setValues('NewTab!A1', [['hi']])
             .setNumColumns('NewTab', 50)
@@ -55,7 +55,7 @@ function testing_dbsheets() {
             .setValues('AnotherTab!A1', [['hi']])
             .setValues('NewTab', [longRow]);
         });
-        var data = tmp.getEffectiveValues('NewTab!A1');
+        var data = tmp.getUnformattedValues('NewTab!A1');
         assert.arrayEquals({
           expected: [['hi']],
           actual: data
@@ -76,7 +76,7 @@ function testing_dbsheets() {
         tmp.setDimensionAsRows();
         var a1Notation = 'calcrows!A1:D1';
         tmp.inputValues(a1Notation, [["Hey", "there", "=3+1"]]);
-        var values = tmp.getEffectiveValues(a1Notation);
+        var values = tmp.getUnformattedValues(a1Notation);
         assert.arrayEquals({expected: [["Hey", "there", 4]], actual: values});
         tmp.clearRange(a1Notation);
       });
@@ -85,7 +85,7 @@ function testing_dbsheets() {
         tmp.setDimensionAsColumns();
         var a1Notation = 'calccols!A1:D1';
         tmp.inputValues(a1Notation, [["Hey"], ["there"], ["=3+1"]]);
-        var values = tmp.getEffectiveValues(a1Notation);
+        var values = tmp.getUnformattedValues(a1Notation);
         assert.arrayEquals({expected: [["Hey"], ["there"], [4]], actual: values}); 
         tmp.setDimensionAsRows();  // TODO: Make this a context manager?
       });
@@ -95,9 +95,9 @@ function testing_dbsheets() {
         
         var a1Notation = 'appends!1:1';
         var result = tmp.insertRow(a1Notation, ["Hey", "there", "=3+1"]);
-        var values = tmp.getEffectiveValues(a1Notation);
+        var values = tmp.getUnformattedValues(a1Notation);
         assert.arrayEquals({expected: [["Hey", "there", 4]], actual: values});
-        values = tmp.getEffectiveValues('appends!A4:E4');
+        values = tmp.getUnformattedValues('appends!A4:E4');
         assert.arrayEquals({expected: [['this', 'is', 'the', 'third', 'row']], actual: values});
       });
     });
@@ -105,8 +105,8 @@ function testing_dbsheets() {
     describe("defineHeaders", function () {
       it("Sets frozen columns and values", function () {
         var headers = [['First', 'Second']];
-        tmp.withRequestBuilder(function (rb) {
-          rb.freezeRows('headers', headers.length)
+        tmp.withSession(function (session) {
+          session.freezeRows('headers', headers.length)
           .setValues('headers', 1, headers.length, headers)
         });
         var newHeaders = tmp.getHeaders('headers');
@@ -116,8 +116,8 @@ function testing_dbsheets() {
     
     describe("requestBuilder", function () {
       it("Adds rows, headers, and colors, changes sheet title", function () {
-        tmp.withRequestBuilder(function (rb) {
-          rb.newTab('several')
+        tmp.withSession(function (session) {
+          session.newTab('several')
           .setValues('several', 1, [['Column1', 'Column2']])
           .setValues('several', 2, [['Info1', 'Info2']])
           .freezeRows('several', 1)
@@ -135,24 +135,24 @@ function testing_dbsheets() {
     describe("Sort a column", function () {
       it("sorts!", function () {          
         // make it sort
-        tmp.withRequestBuilder(function (rb) {
+        tmp.withSession(function (session) {
           [
             [1, 'One'],
             [0, 'Zero'],
             [500, 'Five hundred'],
             [10, 'Ten']
           ].forEach(function (row, index) {
-            rb.updateCells('Values', 0, index, [row]);
+            session.updateCells('Values', 0, index, [row]);
           });
           
-          rb.sort('Values!A:B')
+          session.sort('Values!A:B')
         });
         // 
         
         // check that it is sorted
-        var data = tmp.getEffectiveValues('Values!A:A');
+        var data = tmp.getUnformattedValues('Values!A:A');
         assert.arrayEquals({expected: [[0], [1], [10], [500]], actual: data});
-        var data = tmp.getEffectiveValues('Values!B:B');
+        var data = tmp.getUnformattedValues('Values!B:B');
         assert.arrayEquals({expected: [['Zero'], ['One'], ['Ten'], ['Five hundred']], actual: data});
         //
       });
@@ -167,15 +167,15 @@ function testing_dbsheets() {
         
         tmp.inputValues('autoclear!1:4', [[500, 'B1', 101], [0, 'B2', ''], [1, 'B3', ''], [10, 'B3', '']]);
         
-        tmp.withRequestBuilder(function (rb) {
-          rb.tabsAutoClear();
+        tmp.withSession(function (session) {
+          session.tabsAutoClear();
           
           [["Just this and only this"]].forEach(function (row, index) {
-            rb.setValues('autoclear', index+1, [row]); 
+            session.setValues('autoclear', index+1, [row]); 
           });
         });
         
-        data = tmp.getEffectiveValues('autoclear!A:Z');
+        data = tmp.getUnformattedValues('autoclear!A:Z');
         assert.arrayEquals({expected: [["Just this and only this"]], actual: data});
       });
     });
@@ -185,9 +185,9 @@ function testing_dbsheets() {
       it("overwrites returned value", function () {
         tmp.clearPlugins();
         var values;
-        tmp.withRequestBuilder(function (rb ) {
-          rb.setValues('plugin!A1:2', [['Something'], ['Say Hello']])
-          .freezeRows('plugin', 2);
+        tmp.withSession(function (session) {
+          session.setValues('plugin!A1:2', [['Something'], ['Say Hello']])
+                 .freezeRows('plugin', 2);
         });
         var description = {
           entryPoint: {header: 2},  // second row
@@ -200,15 +200,15 @@ function testing_dbsheets() {
         tmp.insertRow('plugin', ['overwrite me with Hello, World']);
         
         tmp.overwriteWithPlugins('plugin!A3:B3');
-        values = tmp.getEffectiveValues('plugin!A3:B3');
+        values = tmp.getUnformattedValues('plugin!A3:B3');
         assert.arrayEquals({expected: [["Hello, world"]], actual: values});          
       });
       
       it("can be templates for formulas", function () {
         tmp.clearPlugins();
-        tmp.withRequestBuilder(function (rb) {
-          rb.freezeRows('templates', 2)
-          .setValues('templates!A1:B2', [['Something', 'Wicked'], ['Calc', 'Base']]);
+        tmp.withSession(function (session) {
+          session.freezeRows('templates', 2)
+                 .setValues('templates!A1:B2', [['Something', 'Wicked'], ['Calc', 'Base']]);
         });
         
         var description = {
@@ -222,15 +222,15 @@ function testing_dbsheets() {
         tmp.insertRow('templates', ['overwrite me with 4', 3]);
         
         tmp.overwriteWithPlugins('templates!A3:B3');
-        var values = tmp.getEffectiveValues('templates!A3:B3');
+        var values = tmp.getUnformattedValues('templates!A3:B3');
         assert.arrayEquals({expected: [[4, 3]], actual: values});          
       });
       
       it("formulas can be templated with custom functions", function () {
         tmp.clearPlugins();
-        tmp.withRequestBuilder(function (rb) {
-          rb.setValues('formulatemplates!A1:C2', [['Something', 'Wicked', 'Thiswaycomes'], ['Inc', 'Base', 'IncBy10']])
-          .freezeRows('formulatemplates', 2);
+        tmp.withSession(function (session) {
+          session.setValues('formulatemplates!A1:C2', [['Something', 'Wicked', 'Thiswaycomes'], ['Inc', 'Base', 'IncBy10']])
+                 .freezeRows('formulatemplates', 2);
         });
         
         var Inc = {
@@ -260,14 +260,14 @@ function testing_dbsheets() {
         
         tmp.overwriteWithPlugins('formulatemplates!A3:C4');
         
-        var values = tmp.getEffectiveValues('formulatemplates!A3:C4');
+        var values = tmp.getUnformattedValues('formulatemplates!A3:C4');
         assert.arrayEquals({expected: [[4, 3, 13], [5, 4, 14]], actual: values});
       });
       
       it("formulas can be templated from second row items", function () {
-        tmp.withRequestBuilder(function (rb) {
-          rb.setValues('uber!A1:2', [['Base', 'Inc'], ['base', 'inc']])
-          .freezeRows('uber', 2);
+        tmp.withSession(function (session) {
+          session.setValues('uber!A1:2', [['Base', 'Inc'], ['base', 'inc']])
+                 .freezeRows('uber', 2);
         });
         
         tmp.insertRow('uber', [100]);
@@ -282,15 +282,15 @@ function testing_dbsheets() {
         
         tmp.overwriteWithPlugins('uber!A3:C5');
         
-        var values = tmp.getEffectiveValues('uber!A3:C5');
+        var values = tmp.getUnformattedValues('uber!A3:C5');
         assert.arrayEquals({expected:[[100, 101]], actual: values});
       });
       
       it("unique ID plugin handles empty and existing columns", function () {
         tmp.clearPlugins();
-        tmp.withRequestBuilder(function (rb) {
-          rb.setValues('unique!A1:D1', [['Something', 'Wicked', 'id', 'anotherId']])
-          .freezeRows('unique', 1);
+        tmp.withSession(function (session) {
+          session.setValues('unique!A1:D1', [['Something', 'Wicked', 'id', 'anotherId']])
+                 .freezeRows('unique', 1);
         });
         
         ['id', 'anotherId'].forEach(function (name) {
@@ -353,12 +353,12 @@ function testing_dbsheets() {
           },
         });
         
-        tmp.withRequestBuilder(function (rb) {
-          rb.newTab('testExtensions')
-          rb.makeHeaders('testExtensions!A1', headers); 
+        tmp.withSession(function (session) {
+          session.newTab('testExtensions')
+                 .makeHeaders('testExtensions!A1', headers); 
         });
         
-        data = tmp.getEffectiveValues('testExtensions!A1:Z');
+        data = tmp.getUnformattedValues('testExtensions!A1:Z');
         assert.arrayEquals({
           expected: headers,
           actual: data
@@ -370,13 +370,13 @@ function testing_dbsheets() {
     describe("update cells", function () {
       it("updates with strings, numbers, boolean and formula", function () {
         var data;
-        tmp.withRequestBuilder(function (rb) {
-          rb.updateCells('updateCells', 0, 0, [['headerA', 'headerB'], ['infoA', 'infoB'], [3, '=A3+1'], [true, "=NOT(A4)"]]);
+        tmp.withSession(function (session) {
+          session.updateCells('updateCells', 0, 0, [['headerA', 'headerB'], ['infoA', 'infoB'], [3, '=A3+1'], [true, "=NOT(A4)"]]);
         });
-        tmp.withRequestBuilder(function (rb) {
-          rb.updateCells('updateCells', 0, 0, [['new', 'new'], [2, '=A2+1']]);
+        tmp.withSession(function (session) {
+          session.updateCells('updateCells', 0, 0, [['new', 'new'], [2, '=A2+1']]);
         });
-        data = tmp.getEffectiveValues('updateCells!A1:B4');
+        data = tmp.getUnformattedValues('updateCells!A1:B4');
         assert.arrayEquals({
           expected: [['new', 'new'], [2, 3], [3, 4], [true, false]],
           actual: data,
@@ -387,10 +387,10 @@ function testing_dbsheets() {
     describe("update cells with clear", function () {
       it("updates with strings, numbers, boolean and formula", function () {
         var data;
-        tmp.withRequestBuilder(function (rb) {
-          rb.updateCellsWithClear('updateCells', 0, 0, [['clear', 'bitches']]);
+        tmp.withSession(function (session) {
+          session.updateCellsWithClear('updateCells', 0, 0, [['clear', 'bitches']]);
         });
-        data = tmp.getEffectiveValues('updateCells!A1:B3');
+        data = tmp.getUnformattedValues('updateCells!A1:B3');
         assert.arrayEquals({
           expected: [['clear', 'bitches']],
           actual: data,
@@ -401,13 +401,13 @@ function testing_dbsheets() {
     describe("insertrows", function () {
       it("Inserts rows after", function () {
         var data;
-        tmp.withRequestBuilder(function (rb) {
-          rb.setValues('insert!A1', [['headerA', 'headerB'], ['infoA', 'infoB']]);
+        tmp.withSession(function (session) {
+          session.setValues('insert!A1', [['headerA', 'headerB'], ['infoA', 'infoB']]);
         });
-        tmp.withRequestBuilder(function (rb) {
-          rb.insertRows('insert', 1, 2);
+        tmp.withSession(function (session) {
+          session.insertRows('insert', 1, 2);
         });
-        data = tmp.getEffectiveValues('insert!A1:B3');
+        data = tmp.getUnformattedValues('insert!A1:B3');
         assert.arrayEquals({
           expected: [['headerA', 'headerB'], [], ['infoA', 'infoB']],
           actual: data
@@ -416,13 +416,13 @@ function testing_dbsheets() {
       
       it("Inserts columns after", function () {
         var data;
-        tmp.withRequestBuilder(function (rb) {
-          rb.setValues('insert!A1', [['headerA', 'headerB'], ['infoA', 'infoB'], ['infoA2', 'infoB2']]);
+        tmp.withSession(function (session) {
+          session.setValues('insert!A1', [['headerA', 'headerB'], ['infoA', 'infoB'], ['infoA2', 'infoB2']]);
         });
-        tmp.withRequestBuilder(function (rb) {
-          rb.insertColumns('insert', 1, 2);
+        tmp.withSession(function (session) {
+          session.insertColumns('insert', 1, 2);
         });
-        data = tmp.getEffectiveValues('insert!A1:C3');
+        data = tmp.getUnformattedValues('insert!A1:C3');
         assert.arrayEquals({
           expected: [['headerA', '', 'headerB'], ['infoA', '', 'infoB'], ['infoA2', '', 'infoB2']],
           actual: data
@@ -430,11 +430,11 @@ function testing_dbsheets() {
       });
       
       it("Inserts one row", function () {
-        tmp.withRequestBuilder(function (rb) {
-          rb.setValues('insert!A10', [['headerA', 'headerB'], ['infoA', 'infoB'], ['infoA2', 'infoB2']]);
+        tmp.withSession(function (session) {
+          session.setValues('insert!A10', [['headerA', 'headerB'], ['infoA', 'infoB'], ['infoA2', 'infoB2']]);
         });
-        tmp.withRequestBuilder(function (rb) {
-          rb.insertRow('insert', 10);
+        tmp.withSession(function (session) {
+          session.insertRow('insert', 10);
         });
         
       });

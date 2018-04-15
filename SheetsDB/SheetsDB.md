@@ -14,6 +14,13 @@ spreadsheet = Import.SheetsDB.fromProperties({ /* resource properties */ });
 spreadsheet = Import.SheetsDB.new_("Title");
 ```
 
+Retrieve the spreadsheet values:
+
+```js
+var data = spreadsheet.getValues('Sheet1!A1:A');
+var data = spreadsheet.getFormattedValues('Sheet1!A1:A');
+```
+
 Send commands to the Sheets API using `.withSession` context manager. For example, create a new spreadsheet with two tabs and sample values:
 
 ```js
@@ -61,6 +68,52 @@ Set values, starting at the cell indicated by A1Notation. Values of null are ski
 
 ## Discussion
 
+SheetSessions.md attempts to use sensible defaults and easy-to-remember idioms when interacting with it. However, there is a great deal of complexity that is abstracted away, and this section explains principal design decisions.
+
+### Dimension
+
+The `ROWS` or `COLUMNS` [dimension](https://developers.google.com/sheets/api/reference/rest/v4/Dimension) determines how the API understands the dataset (array of arrays) sent to it, for example via `.setValues`:
+
+```js
+var spreadsheet = Import.SheetSessions.fromId('id', {byRows: false});  // default is true
+spreadsheet.withSession(function (session) {
+  session.setValues('Sheet1!A1', [['A1', 'A2', 'A3']]);  // writes down, not across
+});
+```
+
+The default value can be adjusted with `.setDimensionAsColumns` or `.setDimensionAsRows`.
+
+```js
+var spreadsheet = Import.SheetSessions.fromId('id', {byRows: false});  // default is true
+spreadsheet.withSession(function (session) {
+  session.setValues('Sheet1!A1', [['A1', 'A2', 'A3']]);  // writes down, not across
+  session.setDimensionAsRows();
+  session.setValues('Sheet2!A1, [['A1', 'B1', 'C1']]);   // writes across again
+});
+spreadsheet.withSession(function (session) {
+  session.setValues('Sheet2!A1, [['A1', 'B1', 'C1']]);   // writes across ... still (the value is sticky)
+})
+```
+
+But the recommended way would be to use `utils.transpose` that is connected to the sessions object that just adjusts the shape of the array you are working with, and keeping to the `byRows` default manner of working:
+
+```js
+var spreadsheet = Import.SheetSessions.fromId('id', {byRows: true});   
+var data = [['A1', 'A2', 'A3']];
+spreadsheet.withSession(function (session) {
+  var data = session.utils.transpose(data);  // [['A1'], ['A2'], ['A3']]
+  session.setValues('Sheet1!A1', data);   // writes down, not across, because the array is shaped as such
+});
+```
+
+
+### Value Input Option
+
+
+
+### Value Render Option
+
+
 ### Sessions
 
 At the end of the `.withSession` block, SheetsDB.gs builds the minimum required requests and sends it on the Sessions API, via `.batchUpdate`. 
@@ -86,7 +139,7 @@ There are actually two requests made to the API:
 
 ### Input Value Option
 
-Notice from examples in the quickstart that values passed in `.setValues` are from the API's point-of-view treated as `USER_ENTERED` — which means that there is a post processor equivalent to that present when a user inputs into the UI. For example:
+Notice from examples in the quickstart that values passed in `.setValues` are from the API's point-of-view treated as `USER_ENTERED` — which means that there is a post processor equivalent to that present when a user inputs into the frontend UI. For example:
 
 ```js
 session.setValues('Sheet!A1', [['1', 2, 3, 4, 5]]);

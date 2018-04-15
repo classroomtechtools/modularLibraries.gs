@@ -8,87 +8,88 @@ function SessionPackage_ (options) {
   var SessionObj = function (dbsheet) {
     this.dbsheet = dbsheet;
     this.valuesSortBy = null;
-    this.newTabRequests = [];
-    this.preSSRequests = [];
-    this.sRequests = [];
-    this.postSSRequests = [];
+    this.headerRequests = [];
+    this.bodyRequests = [];
+    this.valueRequests = [];
+    this.footerRequests = [];
     this._tabsAutoClear = false;
   };
   
   var builderObj_prototype1 = {
-    transpose: self.utils.transpose,
-    rowArrayToUserEnteredValues: function (rowArray) {
-      return rowArray.reduce(function (acc, row) {
-        var obj;
-        obj = row.reduce(function (a, v) {
-          var o;
-          o = {
-            userEnteredValue: {},
-          }
-          var kind = null;
-          switch (typeof v) {
-            case "string":
-              if (v[0] == '=') {
-                kind = "formulaValue";
-              } else { 
-                // FIXME: What about nanoseconds, ISO 8601 includes this 2015-10-03T01:00:00Z
-                var match = v.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\+(\d{2}):(\d{2})$/);
-                if (match !== null) {
+    utils: {
+      transpose: self.utils.transpose,
+      rowArrayToUserEnteredValues: function (rowArray) {
+        return rowArray.reduce(function (acc, row) {
+          var obj;
+          obj = row.reduce(function (a, v) {
+            var o;
+            o = {
+              userEnteredValue: {},
+            }
+            var kind = null;
+            switch (typeof v) {
+              case "string":
+                if (v[0] == '=') {
                   kind = "formulaValue";
-                  v = '=DATEVALUE("' + match[2] + "/" + match[3] + "/" + match[1] + '")';
+                } else { 
+                  // FIXME: What about nanoseconds, ISO 8601 includes this 2015-10-03T01:00:00Z
+                  var match = v.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\+(\d{2}):(\d{2})$/);
+                  if (match !== null) {
+                    kind = "formulaValue";
+                    v = '=DATEVALUE("' + match[2] + "/" + match[3] + "/" + match[1] + '")';
+                  } else {
+                    kind = "stringValue";
+                  }
+                }
+                break;
+              case "number":
+                kind = "numberValue";
+                break;
+              case "boolean":
+                kind = "boolValue";
+                break;
+              case "object":
+                if (v === null) {
+                  kind = "stringValue";
+                  v = "";
                 } else {
                   kind = "stringValue";
+                  v = JSON.stringify(v);
                 }
-              }
-              break;
-            case "number":
-              kind = "numberValue";
-              break;
-            case "boolean":
-              kind = "boolValue";
-              break;
-            case "object":
-              if (v === null) {
+                break;
+              case "undefined":
                 kind = "stringValue";
                 v = "";
-              } else {
-                kind = "stringValue";
-                v = JSON.stringify(v);
-              }
-              break;
-            case "undefined":
-              kind = "stringValue";
-              v = "";
-              break;
-            default:
-              row.__print__;
-              throw Error("Unknown type value " + typeof(v) + " sent to updateCell");
-          }
-          o.userEnteredValue[kind] = v;
-          a.push(o);
-          return a;
+                break;
+              default:
+                throw Error("Unknown type value " + typeof(v) + " sent to updateCell");
+            }
+            o.userEnteredValue[kind] = v;
+            a.push(o);
+            return a;
+          }, []);
+          acc.push({values: obj});
+          return acc;
         }, []);
-        acc.push({values: obj});
-        return acc;
-      }, []);
+      }
     },
     addValueRequest: function (fn) {
       return function () {
         var request = fn.apply(this, arguments);
-        this.sRequests.push(request);
+        this.valueRequests.push(request);
         return this;
       };
     },
     
-    addPreRequest: function (fn) {
+    addBodyRequest: function (fn) {
       return function () {
         var request, important;
         request = fn.apply(this, arguments);
         important = ['NewTab', 'SetNumColumns', 'SetNumRows'].indexOf(fn.name);        
         if (important !== -1) {
-          this.newTabRequests.push([request, important]);
+          this.headerRequests.push([request, important]);
         } else {
-          this.preSSRequests.push(request);
+          this.bodyRequests.push(request);
         }
         return this;
       }
@@ -97,14 +98,14 @@ function SessionPackage_ (options) {
     addPostRequest: function (fn) {
       return function () {
         var request = fn.apply(this, arguments);
-        this.postSSRequests.push(request);
+        this.footerRequests.push(request);
         return this;
       }
     },
   };
   
   var builderObj_prototype2 = {
-    commit: builderObj_prototype1.addPreRequest(
+    commit: builderObj_prototype1.addBodyRequest(
       function () {
         return function () {
           return {commit: true};
@@ -132,12 +133,12 @@ function SessionPackage_ (options) {
     /*
      * columns first because that is same as a1Notation
      */
-    updateCells: builderObj_prototype1.addPreRequest(
+    updateCells: builderObj_prototype1.addBodyRequest(
       function (sheet, colIndex, rowIndex, rowArray) {
         return function () {
           return {
             updateCells: {
-              rows: builderObj_prototype1.rowArrayToUserEnteredValues(rowArray),
+              rows: builderObj_prototype1.utils.rowArrayToUserEnteredValues(rowArray),
               fields: '*',
               start: {
                 sheetId: this.getSheet(sheet).properties.sheetId,
@@ -150,14 +151,14 @@ function SessionPackage_ (options) {
       }
     ),
     
-    updateCellsWithClear: builderObj_prototype1.addPreRequest(
+    updateCellsWithClear: builderObj_prototype1.addBodyRequest(
       function (sheet, rowIndex, colIndex, rowArray) {
         return function () {
           var sht;
           sht = this.getSheet(sheet);
           return {
             updateCells: {
-              rows: builderObj_prototype1.rowArrayToUserEnteredValues(rowArray),
+              rows: builderObj_prototype1.utils.rowArrayToUserEnteredValues(rowArray),
               fields: '*',
               range: {
                 sheetId: sht.properties.sheetId,
@@ -200,7 +201,7 @@ function SessionPackage_ (options) {
       }
     ),
     
-    insertRows: builderObj_prototype1.addPreRequest(
+    insertRows: builderObj_prototype1.addBodyRequest(
       function (sheet, startRow, endRow) {
         return function () {
           return {
@@ -223,7 +224,7 @@ function SessionPackage_ (options) {
       return this;
     },
     
-    insertColumns: builderObj_prototype1.addPreRequest(
+    insertColumns: builderObj_prototype1.addBodyRequest(
       function (sheet, startCol, endCol) {
         return function () {
           return {
@@ -242,7 +243,7 @@ function SessionPackage_ (options) {
     ),
     
     
-    setNumColumns: builderObj_prototype1.addPreRequest(
+    setNumColumns: builderObj_prototype1.addBodyRequest(
       function SetNumColumns (sheet, numCols) {
         return function SetNumColumns () {
           return {
@@ -260,7 +261,7 @@ function SessionPackage_ (options) {
       }
     ),
     
-    hideGridlinesRequest: builderObj_prototype1.addPreRequest(
+    hideGridlinesRequest: builderObj_prototype1.addBodyRequest(
       function (sheet, bool) {
         return function () {
           return { 
@@ -278,7 +279,7 @@ function SessionPackage_ (options) {
       }
     ),
     
-    setNumRows: builderObj_prototype1.addPreRequest(
+    setNumRows: builderObj_prototype1.addBodyRequest(
       function SetNumRows (sheet, numRows) {
         return function SetNumRows () {
           return {
@@ -300,7 +301,7 @@ function SessionPackage_ (options) {
       In addition to a freezeRows request, it can set the keyHeadingRow which is an option
       that allows us to define which row in the header to look at
      */
-    freezeRows: builderObj_prototype1.addPreRequest(
+    freezeRows: builderObj_prototype1.addBodyRequest(
       function (sheet, numRows, headerRow) {
         headerRow = headerRow || numRows;
         this.dbsheet.setKeyHeadingRow(headerRow);
@@ -320,7 +321,7 @@ function SessionPackage_ (options) {
       }
     ),
     
-    freezeColumns: builderObj_prototype1.addPreRequest(
+    freezeColumns: builderObj_prototype1.addBodyRequest(
       function (sheet, numCols) {
         return function () {
           return {
@@ -338,7 +339,7 @@ function SessionPackage_ (options) {
       }
     ),
     
-    changeTabColor: builderObj_prototype1.addPreRequest(
+    changeTabColor: builderObj_prototype1.addBodyRequest(
       function (sheet, red, green, blue, alpha) {
         if (typeof alpha === 'undefined')
           alpha = 1;
@@ -361,7 +362,7 @@ function SessionPackage_ (options) {
       }
     ), 
     
-    newTab: builderObj_prototype1.addPreRequest(
+    newTab: builderObj_prototype1.addBodyRequest(
       function NewTab (title) {
         return function NewTab () {
           return {
@@ -375,7 +376,7 @@ function SessionPackage_ (options) {
       }
     ),    
     
-    tabTitleRequest: builderObj_prototype1.addPreRequest(
+    tabTitleRequest: builderObj_prototype1.addBodyRequest(
       function (sheet, title) {
         return function () {
           return {
@@ -394,7 +395,7 @@ function SessionPackage_ (options) {
     /*
      * range: a1notation | gridrange
      */
-    sort: builderObj_prototype1.addPreRequest(
+    sort: builderObj_prototype1.addBodyRequest(
       function (range, dimensionIndex, sortOrder) {
         return function () {
           return {
@@ -410,7 +411,7 @@ function SessionPackage_ (options) {
       }
     ),
 
-    addBand: builderObj_prototype1.addPreRequest(
+    addBand: builderObj_prototype1.addBodyRequest(
       function (range, first, second, third, fourth) {
         return function () {
           return {
@@ -425,7 +426,7 @@ function SessionPackage_ (options) {
       }
     ),
     
-    updateBand: builderObj_prototype1.addPreRequest(
+    updateBand: builderObj_prototype1.addBodyRequest(
       function (bandId, range, first, second, third, fourth) {
         return function () {
           return {
