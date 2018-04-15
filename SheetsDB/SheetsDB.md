@@ -10,7 +10,7 @@ The name comes from the observation that interacting with a Google Sheet in sess
 
 ## Quickstart
 
-Copy the [code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/SheetsDB/SheetsDB.gs) and bring it into your project. Use it. There are several constructor methods are available:
+Copy the code [here](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/SheetsDB/SheetsDB.gs) and [here](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/SheetsDB/SheetsDBBuilder.gs) (as two seperate files) and bring it into your project. Use it. There are several constructor methods are available:
 
 ```js 
 var spreadsheet;
