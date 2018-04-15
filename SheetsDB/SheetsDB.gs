@@ -4,6 +4,7 @@
 
 function Package (config) {
   config = config || {};  // config for defaults
+  config.valueInputOption = config.valueInputOption || 'USER_ENTERED';
   config.dimension = config.dimension || 'ROWS';
   config.keyHeaderRow = config.keyHeaderRow || 0;
   config.destInfo = config.destInfo || [];   // for the form!
@@ -25,7 +26,7 @@ function Package (config) {
     });
   };
 
-  var BuilderObj = Import.SheetsDBBuilder({
+  var Session = Import.SheetsDBBSession({
     config: config
   });
 
@@ -186,7 +187,7 @@ function Package (config) {
           return acc;
         }.bind(this), []);
         this.api.values.batchUpdate({
-          valueInputOption: "USER_ENTERED",
+          valueInputOption: config.valueInputOption,
           data: resolvedRequests
         }, this.getId());
         
@@ -201,7 +202,7 @@ function Package (config) {
     },
     
     makeRequestBuilder: function () {
-      return new BuilderObj(this);
+      return new Session(this);
     }, 
     
   };
@@ -562,7 +563,7 @@ function Package (config) {
         majorDimension: config.dimension,
         values: [row]
       }, this.getId(), range, {
-        valueInputOption: "USER_ENTERED",
+        valueInputOption: config.valueInputOption,
         insertDataOption: "INSERT_ROWS",
       });
     },
@@ -633,10 +634,10 @@ function Package (config) {
       var requests = this.getPluginsOverwriteBuildRequests(rangeA1Notation);
 
       // Add value requests from results and allow the sheet to update
-      this.withRequestBuilder(function (rb) {
+      this.withSession(function (session) {
         requests.forEach(function (pluginItems) {
           pluginItems.forEach(function (item) {
-            rb.setValues(item.a1Notation, item.values);
+            session.setValues(item.a1Notation, item.values);
           });
         });
       });
@@ -644,7 +645,7 @@ function Package (config) {
 
     inputValues: function (rangeNotation, values) {
       var request = {
-        valueInputOption: 'USER_ENTERED',
+        valueInputOption: config.valueInputOption,
         data: [
           {
             range: rangeNotation,
@@ -711,7 +712,7 @@ function Package (config) {
       return config.destInfo;
     },
     
-    withRequestBuilder: dbSheetPrototype.ssUpdaterWrapper(Import.ContextManager().call(this, {
+    withSession: dbSheetPrototype.ssUpdaterWrapper(Import.ContextManager().call(this, {
       enter: function (obj) {
         obj.preSSRequests = [];
         obj.newTabRequests = [];
@@ -720,7 +721,7 @@ function Package (config) {
         return [obj];
       },
       exit: dbSheetPrototype.processBuilder,
-      params: function () { return [this.makeRequestBuilder()]; },  // new BuilderObj(this)
+      params: function () { return [this.makeRequestBuilder()]; },  // new Session(this)
     })),
     
   };  // DbSheet()
@@ -734,7 +735,7 @@ function Package (config) {
   self.extend.customBuilder = function (definition) {    
     var namespace;
     for (namespace in definition) {
-      BuilderObj.prototype[namespace] = definition[namespace];
+      Session.prototype[namespace] = definition[namespace];
     }
   };
   
