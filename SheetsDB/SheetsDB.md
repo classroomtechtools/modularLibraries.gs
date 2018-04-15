@@ -58,12 +58,41 @@ Import.SheetsDB.withTempSpreadsheet(function (temp) {
 });
 ```
 
-## Session API
+## Sessions API
 
-#####session.setValues("A1Notation", [['values'...]])
-Set values, starting at the cell indicated by A1Notation. Values of null are skipped.
+Here is a list of everything else you can do with the sessions object it:
 
-#####session.setValues("Tab", left, right, [['values'...]])
+`tabsAutoClear` Clear out any tab that is manipulated in the session before writing.
+
+`updateCells` Using grid notation, update the value of the cell
+
+`updateCellsWithClear` 
+
+`insertRows` (uses `ROWS` dimension)
+
+`insertRow` insert just one row
+
+`insertColumns` (uses `COLUMNS` dimension)
+
+`setNumColumns` `setNumRows` Set the number to this, by deleting unneeded or adding if not yet existing
+
+`hideGridlinesRequest` Hide the gridlines
+
+`freezeRows` Freeze the x number of rows from the top
+
+`freezeColumns` Freeze the y number of columns from the left
+
+`changeTabColor(sheet, red, green, blue, alpha` Change the color. Alpha by default is `1`
+
+`newTab(title)` addSheet request
+
+`tabTitleRequest(sheet, title` Change the sheet to the title title
+
+`sort(range, dimensionIndex, sortOrder)` Make sort request with `dimensionIndex` by default `0` and `sortOrder` by default `ASCENDING` 
+
+`addBand(range, first, second, third, fourth)`
+
+`updateBand(bandId, range, first, second, third, fourth)`
 
 
 ## Discussion
@@ -107,37 +136,21 @@ spreadsheet.withSession(function (session) {
 ```
 
 
-### Value Input Option
+### Value Render & Value Input Options
 
-
-
-### Value Render Option
-
-
-### Sessions
-
-At the end of the `.withSession` block, SheetsDB.gs builds the minimum required requests and sends it on the Sessions API, via `.batchUpdate`. 
-
-When interfacing with the raw API, tabs need to be created in a prior call before their cell values can be successfully updated — but when using SheetsDB this is handled for you. The code can be written into one "session" in any order. For the below "Hello World" actions:
+These settings in the API is intended for the programmer to indicate what aspect of the cell data we wish to inspect. The formula, formatted, and unformatted values are all possible. 
 
 ```js
-var spreadsheet = Import.SheetsDB.new_('Title');
-spreadsheet.withSession(function (session) {
-  session.addTab('Hello')
-         .setValues('Hello!A1', [['first', 'row', 'of', 'first', 'tab']])
-         .addTab('World')
-         .setValues('World', 1, 1, [['second', 'row']]);
-});
+spreadsheet.getValue(a1Notation);  // returns value as defined by "UNFORMATTED_VALUE" 
+spreadsheet.getFormulaValue(a1Notation);
+spreadsheet.getFormattedValue(a1Notation);
 ```
 
-There are actually two requests made to the API:
+Change the default behaviour of `.getValue` in the config settings:
 
-- One call to create both tabs
-- Another call, after the above, to update the values
-
-
-
-### Input Value Option
+```js
+var spreadsheet = Import.SheetSessions.fromId('id', {rawOutput: false});   
+```
 
 Notice from examples in the quickstart that values passed in `.setValues` are from the API's point-of-view treated as `USER_ENTERED` — which means that there is a post processor equivalent to that present when a user inputs into the frontend UI. For example:
 
@@ -175,7 +188,33 @@ session.setValues('Sheet!A1', [['=DATEVALUE("01/30/2000")']]);
 ```
 
 
+### SetValues and updateCells
 
+The former uses the values .get API, while the latter uses the .batchUpdate spreadsheet API. The main difference is that updateCells uses grid notation to resolve the location, while setValues uses a1Notation. 
+
+For both kinds, you can send formulas to the spreadsheet by starting it with `=`. The differences between the different kind of APIs are abstracted away.
+
+
+### Sessions
+
+At the end of the `.withSession` block, SheetsDB.gs builds the minimum required requests and sends it on the Sessions API, via `.batchUpdate`. 
+
+When interfacing with the raw API, tabs need to be created in a prior call before their cell values can be successfully updated — but when using SheetsDB this is handled for you. The code can be written into one "session" in any order. For the below "Hello World" actions:
+
+```js
+var spreadsheet = Import.SheetsDB.new_('Title');
+spreadsheet.withSession(function (session) {
+  session.addTab('Hello')
+         .setValues('Hello!A1', [['first', 'row', 'of', 'first', 'tab']])
+         .addTab('World')
+         .setValues('World', 1, 1, [['second', 'row']]);
+});
+```
+
+There are actually two requests made to the API:
+
+- One call to create both tabs
+- Another call, after the above, to update the values
 
 ## Errors
 
