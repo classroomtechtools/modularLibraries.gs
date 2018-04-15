@@ -10,7 +10,7 @@ The name comes from the observation that interacting with a Google Sheet in sess
 
 ## Quickstart
 
-Several constructor methods are available:
+Copy the [code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/SheetsDB/SheetsDB.gs) and bring it into your project. Use it. There are several constructor methods are available:
 
 ```js 
 var spreadsheet;
@@ -126,7 +126,7 @@ spreadsheet.withSession(function (session) {
   session.setValues('Sheet2!A1', [['A1', 'B1', 'C1']]);   // writes across again
 });
 spreadsheet.withSession(function (session) {
-  session.setValues('Sheet2!A1, [['A1', 'B1', 'C1']]);   // writes across ... still (the value is sticky)
+  session.setValues('Sheet2!A1', [['A1', 'B1', 'C1']]);   // writes across ... still (the value is sticky)
 })
 ```
 
