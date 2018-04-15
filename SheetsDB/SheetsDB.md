@@ -1,6 +1,12 @@
 # SheetsDB.gs
 
-Create and modify Google Spreadsheets via sessions.
+Interact with Google Spreadsheets. Create sessions that sorts out the Sheets API implementation details, update any apsect of a sheet. 
+
+## Motivation
+
+I created this when I needed a way to download large datasets from an API endpoint, and updating the spreadsheet took several minutes. With this, writing the code to update the spreadsheet is a cinch, and it updates in one- (or nearly one) fell swoop.
+
+The name comes from the observation that interacting with a Google Sheet in sessions is very much like a database.
 
 ## Quickstart
 
