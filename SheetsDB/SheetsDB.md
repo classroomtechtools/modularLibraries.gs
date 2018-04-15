@@ -123,7 +123,7 @@ var spreadsheet = Import.SheetSessions.fromId('id', {byRows: false});  // defaul
 spreadsheet.withSession(function (session) {
   session.setValues('Sheet1!A1', [['A1', 'A2', 'A3']]);  // writes down, not across
   session.setDimensionAsRows();
-  session.setValues('Sheet2!A1, [['A1', 'B1', 'C1']]);   // writes across again
+  session.setValues('Sheet2!A1', [['A1', 'B1', 'C1']]);   // writes across again
 });
 spreadsheet.withSession(function (session) {
   session.setValues('Sheet2!A1, [['A1', 'B1', 'C1']]);   // writes across ... still (the value is sticky)
@@ -224,10 +224,10 @@ There are actually two requests made to the API:
 
 ## Errors
 
-###Invalid data
+### Invalid data
 This occurs happen when you use `Session.setValues` and do not define it as a two-dimensional array.
 
-###Session Object: Method x was not found in [Object object]
+### Session Object: Method x was not found in [Object object]
 
 This occurs when you've attempted to use an undefined method on a sessin object:
 
