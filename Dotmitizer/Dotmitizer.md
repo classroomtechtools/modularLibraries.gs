@@ -4,13 +4,15 @@ Convert an array of json objects into spreadsheet-friendly array of arrays, wher
 
 Rows that do not originally contain values for columns that appear in other objects are assigned as `null`.
 
-With thanks to [dotize](https://github.com/vardars/dotize/blob/master/src/dotize.js)
+With thanks to [dotize](https://github.com/vardars/dotize/blob/master/src/dotize.js).
 
 ## Known limitations
 
 Nested objects that contain more than one array causes breakage. Further investigation to resolve is planned, but for now (April 2018) supporting such complexity is not needed by this author. Contributions welcome. See the unit tests for more information. All hail unit tests.
 
 ## Quickstart
+
+Copy the [code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Dotmitizer/DotmitizerUnitTests.gs) into your project. Use it:
 
 ```js
 var dotmizer, data;
