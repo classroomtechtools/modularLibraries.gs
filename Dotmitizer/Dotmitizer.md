@@ -30,8 +30,7 @@ date = dotmitizer.jsonsToSheetRows([
   [ /*
        "header" array of all column names, 
        in alphabetical order -- with id first (if present in any object) 
-       columns of nested object 
-       have dot.notation (for objects) and braces[0] (for arrays)
+       columns of nested object have dot.notation (for objects) and braces[0] (for arrays)
     */ ],
   [ /* first row, with any "missing" columns as null value */ ],
   [ /* second row, ditto */ ]
