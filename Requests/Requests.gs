@@ -106,7 +106,7 @@ function RequestsPackage_ (config) {
           page++;
         }
         var fetchResult = batch.fetchAll();
-        var zipResult = fetchResult.zip(rootKey, json);
+        var zipResult = fetchResult.zip(rootKey, {initialValue: json[rootKey]});
         return zipResult;
       },
       
