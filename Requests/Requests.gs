@@ -12,10 +12,23 @@ function RequestsPackage_ (config) {
     return self().get('https://www.googleapis.com/discovery/v1/apis/' + name + '/' + version + '/rest');
   };
 
+  var discoveryCache = {};
   discoverUrl = function (name, version, resource, method) {
     var data;
-    data = discovery(name, version).json();
-    return data.baseUrl + data.resources[resource].methods[method].path;
+    data = discoveryCache[name+version];
+    if (!data)
+      data = discovery(name, version).json();
+    if (resource.indexOf('.') == -1) {
+      // straight forward, no resource resolution
+      return data.baseUrl + data.resources[resource].methods[method].path;
+    } else {
+      // resources can be dot-noted in order to resolve a path, e.g. sheets.spreadsheets.values, sheets.spreadsheets.developerMetadata
+      var resources = data;
+      resource.split('.').forEach(function (res) {
+        resources = resources.resources[res];
+      });
+      return data.baseUrl + resources.methods[method].path;
+    }
   };
 
   config = config || {};
