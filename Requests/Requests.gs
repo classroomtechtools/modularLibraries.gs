@@ -65,6 +65,7 @@ function RequestsPackage_ (config) {
         try {
           return JSON.parse(this.text());
         } catch (err) {
+          Logger.log(err.__pprint__);
           Logger.log(this.text());
           throw Error("Response did not return a parsable json object");
         }
@@ -289,6 +290,7 @@ function RequestsPackage_ (config) {
     _options.body = _options.body || {};
     _options.headers = _options.headers || null;
     _options.query = _options.query || {};
+    _options.repeatingQuery = _options.repeatingQuery || {};
 
     var toParams;
 
@@ -343,11 +345,25 @@ function RequestsPackage_ (config) {
       },
 
       getUrl: function () {
-        var obj = self.utils.extend(true, config.query, _options.query);
+        var obj, ret;
+        obj = self.utils.extend(true, config.query, _options.query);
         if (typeof _options.url === 'object' && config.baseUrl) _options.url = self.format(_options.baseUrl, _options.url);
         if (_options.url.indexOf('?') !== -1) _options.url = _options.url.slice(0, _options.url.indexOf('?'));
         if (Object.keys(obj).length == 0) return _options.url;
-        var ret = _options.url + "?" + Object.keys(obj).reduce(function(a,k){a.push(k+'='+encodeURIComponent(obj[k]));return a},[]).join('&');
+        ret = _options.url + "?" + Object.keys(obj).reduce(
+          function(a,k) {
+            var val = obj[k];
+            if (Array.isArray(val)) {  // repeating items
+              val.forEach(function (v) {
+                a.push(k+'='+encodeURIComponent(v));
+              });
+            } else {
+              a.push(k+'='+encodeURIComponent(val));
+            }
+            return a;
+          }, []
+        ).join('&');        
+
         return ret;
       },
       
