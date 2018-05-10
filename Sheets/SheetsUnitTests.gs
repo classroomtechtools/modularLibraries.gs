@@ -1,15 +1,3 @@
-function testUtilities() {
-  Import.UnitTesting.init();
-  Import.FormatLogger.init();
-  var sheets = Import.Sheets();
-  describe("spreadsheets api", function () {
-    it("array2ListValues", function () {
-      var reply = sheets.utils.array2ListValues([['updated']]);
-      reply.__pprint__;
-    });
-  });
-}
-
 function testSheets() {
   Import.UnitTesting.init();
   Import.FormatLogger.init();
@@ -68,11 +56,11 @@ function testSheets() {
           fields: '*',  // at least one must be specified, * for all
         },
       }];
+      sampleSheet.api.spreadsheets.batchUpdate.setOption('fields', 'updatedSpreadsheet.sheets.data.rowData.values.userEnteredValue');
       var ss = sampleSheet.api.spreadsheets.batchUpdate(requests, {
         // only get back the row we're interested in testing
         includeSpreadsheetInResponse: true,
         responseRanges: ['Sheet1!A4:C4'],  
-        fields: 'updatedSpreadsheet.sheets.data.rowData.values.userEnteredValue'
       });
       assert.true_({
         actual: ss.ok,
@@ -81,14 +69,13 @@ function testSheets() {
       assert.objectEquals({
         actual: ss.json(),
         expected: {"updatedSpreadsheet":{"sheets":[{"data":[{"rowData":[{"values":[{"userEnteredValue":{"stringValue":"A4"}},{"userEnteredValue":{"stringValue":"B4"}},{"userEnteredValue":{"stringValue":"C4"}}]}]}]}]}},
-        comment: "Did not write to spreadsheets successfully."
+        comment: "Did not write to spreadsheets successfully: {0.print}".__format__(ss.json())
       });
     });
     it("api.spreadsheets.getByDataFilter", function () {
+      sampleSheet.api.spreadsheets.getByDataFilter.setOption('fields', 'sheets.data.rowData.values.userEnteredValue');
       var ss = sampleSheet.api.spreadsheets.getByDataFilter({
         a1Range: "Sheet1!A4:C4",
-      }, {
-        fields: 'sheets.data.rowData.values.userEnteredValue'  // opt
       });
       assert.true_({
         actual: ss.ok,
@@ -97,7 +84,7 @@ function testSheets() {
       assert.objectEquals({
         actual: ss.json(),
         expected: {"sheets":[{"data":[{"rowData":[{"values":[{"userEnteredValue":{"stringValue":"A4"}},{"userEnteredValue":{"stringValue":"B4"}},{"userEnteredValue":{"stringValue":"C4"}}]}]}]}]},
-        comment: "Did not write to spreadsheet succesfully"
+        comment: "Did not write to spreadsheet succesfully: {0.print}".__format__(ss.json())
       });
     });
   });
@@ -137,7 +124,11 @@ function testSheets() {
     });
 
     it("spreadsheets.developerMetadata.search", function () {
-      var response = sampleSheet.api.spreadsheets.developerMetadata.search('key');
+      var response = sampleSheet.api.spreadsheets.developerMetadata.search({
+        developerMetadataLookup: {
+          metadataKey: 'key'
+        }
+      });
       assert.true_({
         actual: response.ok,
         comment: response.text()
@@ -261,6 +252,26 @@ function testSheets() {
       assert.arrayEquals({
         actual: json.valueRanges[1].valueRange.values,
         expected: [["Updated A1"]],
+      });
+    });
+    
+    it("spreadsheets.api.spreadsheets.values.batchUpdateByDataFilter", function () {
+      var response, json;
+      response = sampleSheet.api.spreadsheets.values.batchUpdateByDataFilter({
+        'Sheet2!A1': [['A1 updated via batchUpdate']]
+      });
+      assert.true_({
+        actual: response.ok,
+        comment: response.text()
+      });
+      json = response.json();
+      assert.notUndefined({
+        actual: json.responses,
+        comment: "No responses property in response {0.print}".__format__(json)
+      });
+      assert.equals({
+        actual: json.responses[0].updatedRange,
+        expected: 'Sheet2!A1'
       });
     });
     

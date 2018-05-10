@@ -2,7 +2,7 @@
 
 "Sheets",
 
-function Package (config) {
+function SheetsPackage_ (config) {
   config.spreadsheetId = config.spreadsheetId || null;
   config.dimension = config.dimension || 'ROWS';
   config.valueInputOption = config.valueInputOption || 'RAW';
@@ -23,327 +23,351 @@ function Package (config) {
   // 
   // Spreadsheets
   //
-  apiObject.api.spreadsheets.create = function (spreadsheet, fields) {
-    spreadsheet = spreadsheet || {properties: {title: config.defaultTitle}};
-    fields = fields || '';
-    return Import.Requests({
-      config: {
-        discovery: self.discoverSpreadsheet('create'),
-        oauth: 'me',
-        method: 'post',
-        query: {
-          fields: fields,
-        },
-        body: spreadsheet
-      }
-    })();
-  };
-  
-  apiObject.api.spreadsheets.get = function (fields) {
-    fields = fields || '';
-    return Import.Requests({
-      config: {
-        discovery: self.discoverSpreadsheet('get'),
-        oauth: 'me',
-        method: 'get',
-        query: {
-          fields: fields,
+  apiObject.api.spreadsheets.create = self.utils.standardQueryDecorator(
+    function Me (spreadsheet) {
+      spreadsheet = spreadsheet || {properties: {title: config.defaultTitle}};
+      return Import.Requests({
+        config: {
+          discovery: self.discoverSpreadsheet('create'),
+          oauth: 'me',
+          method: 'post',
+          query: Me.options,
+          body: spreadsheet
         }
-      }
-    })({spreadsheetId: config.spreadsheetId});
-  };
+      })();
+    }
+  );
   
-  apiObject.api.spreadsheets.batchUpdate = function (requests, opt) {
-    opt = opt || {};
-    opt.includeSpreadsheetInResponse = opt.includeSpreadsheetInResponse || false;
-    opt.responseIncludeGridData = opt.responseIncludeGridData || false;
-    opt.responseRanges = opt.responseRanges || '';
-    opt.fields = opt.fields || '*';
-
-    return Import.Requests({
-      config: {
-        discovery: self.discoverSpreadsheet('batchUpdate'),
-        oauth: 'me',
-        method: 'post',
-        query: {
-          fields: opt.fields
-        },
-        body: {
-          requests: requests,
-          includeSpreadsheetInResponse: opt.includeSpreadsheetInResponse,
-          responseIncludeGridData: opt.responseIncludeGridData,
-          responseRanges: opt.responseRanges,
+  apiObject.api.spreadsheets.get = self.utils.standardQueryDecorator(
+    function Me () {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverSpreadsheet('get'),
+          oauth: 'me',
+          method: 'get',
+          query: Me.options
         }
-      }
-    })({spreadsheetId: config.spreadsheetId});
-  };
+      })({spreadsheetId: config.spreadsheetId});
+    }
+  );
   
-  apiObject.api.spreadsheets.getByDataFilter = function (dataFilters, opt) {
-    opt = opt || {};
-    opt.fields = opt.fields || '*';
-    opt.includeGridData = opt.includeGridData || false;
-    return Import.Requests({
-      config: {
-        discovery: self.discoverSpreadsheet('getByDataFilter'),
-        oauth: 'me',
-        method: 'post',
-        body: {
-          dataFilters: dataFilters,
-          //includeGridData: opt.includeGridData,  // this is actually ignored, since we use fields
-        },
-        query: {
-          fields: opt.fields,
+  apiObject.api.spreadsheets.batchUpdate = self.utils.standardQueryDecorator(
+    function Me (requests, opt) {
+      opt = opt || {};
+      opt.includeSpreadsheetInResponse = opt.includeSpreadsheetInResponse || false;
+      opt.responseIncludeGridData = opt.responseIncludeGridData || false;
+      opt.responseRanges = opt.responseRanges || '';
+  
+      return Import.Requests({
+        config: {
+          discovery: self.discoverSpreadsheet('batchUpdate'),
+          oauth: 'me',
+          method: 'post',
+          query: Me.options,
+          body: {
+            requests: requests,
+            includeSpreadsheetInResponse: opt.includeSpreadsheetInResponse,
+            responseIncludeGridData: opt.responseIncludeGridData,
+            responseRanges: opt.responseRanges,
+          }
         }
-      }
-    })({spreadsheetId: config.spreadsheetId});
-  };
-  
-  apiObject.api.spreadsheets.developerMetadata.get = function (id) {
-    var response;
-    response = Import.Requests({
-      config: {
-        discovery: self.discoverDevMetadata('get'),
-        oauth: 'me',
-        method: 'get',
-      }
-    })({spreadsheetId: config.spreadsheetId, metadataId: id});
-    if (response.statusCode() == 400) return null;
-    return response;
-  };
-
-  apiObject.api.spreadsheets.developerMetadata.search = function (key) {
-    var response;
-    response = Import.Requests({
-      config: {
-        discovery: self.discoverDevMetadata('search'),
-        oauth: 'me',
-        method: 'post',
-        body: {
-          dataFilters: [{
-            developerMetadataLookup: {
-              metadataKey: key
-            }
-          }]
-        }
-      }
-    })({spreadsheetId: config.spreadsheetId});   
-    if (response.statusCode() == 400) return null;
-    return response;
-  };
-  
-  apiObject.api.spreadsheets.values.append = function (table, values) {
+      })({spreadsheetId: config.spreadsheetId});
+    }
+  );
     
-    return Import.Requests({
-      config: {
-        discovery: self.discoverValues('append'),
-        oauth: 'me',
-        method: 'post',
-        query: {
-          valueInputOption: config.valueInputOption,
-          insertDataOption: config.insertDataOption,
-          includeValuesInResponse: config.includeValuesInResponse,
-          responseValueRenderOption: config.valueRenderOption,
-          responseDateTimeRenderOption: config.dateTimeRenderOption
-        },
-        body: {
-          range: table,
-          majorDimension: config.dimension,
-          values: values
+  apiObject.api.spreadsheets.getByDataFilter = self.utils.standardQueryDecorator(
+    function Me (dataFilters) {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverSpreadsheet('getByDataFilter'),
+          oauth: 'me',
+          method: 'post',
+          body: {
+            dataFilters: dataFilters,
+            //includeGridData: opt.includeGridData,  // this is actually ignored, since we use fields
+          },
+          query: Me.options
         }
-      }
-    })({spreadsheetId: config.spreadsheetId, range: table});
-  };
+      })({spreadsheetId: config.spreadsheetId});
+    }
+  );
+    
+  apiObject.api.spreadsheets.developerMetadata.get = self.utils.standardQueryDecorator(
+    function Me (id) {
+      var response;
+      response = Import.Requests({
+        config: {
+          discovery: self.discoverDevMetadata('get'),
+          oauth: 'me',
+          method: 'get',
+          query: Me.options
+        }
+      })({spreadsheetId: config.spreadsheetId, metadataId: id});
+      if (response.statusCode() == 400) return null;
+      return response;
+    }
+  );
+
+  apiObject.api.spreadsheets.developerMetadata.search = self.utils.standardQueryDecorator(
+    function Me (/*dataFilters*/) {
+      var response;
+      response = Import.Requests({
+        config: {
+          discovery: self.discoverDevMetadata('search'),
+          oauth: 'me',
+          method: 'post',
+          body: {
+            dataFilters: Array.prototype.slice.call(arguments)
+          },
+          query: Me.options
+        }
+      })({spreadsheetId: config.spreadsheetId});   
+      if (response.statusCode() == 400) return null;
+      return response;
+    }
+  );
   
-  apiObject.api.spreadsheets.values.batchClear = function (/* clear ranges */) {
-    return Import.Requests({
-      config: {
-        discovery: self.discoverValues('batchClear'),
-        oauth: 'me',
-        method: 'post',
-        body: {
-          ranges: Array.prototype.slice.call(arguments),
+  apiObject.api.spreadsheets.values.append = self.utils.standardQueryDecorator(
+    function Me (table, values) {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverValues('append'),
+          oauth: 'me',
+          method: 'post',
+          query: self.augmentQueryParams({
+            valueInputOption: config.valueInputOption,
+            insertDataOption: config.insertDataOption,
+            includeValuesInResponse: config.includeValuesInResponse,
+            responseValueRenderOption: config.valueRenderOption,
+            responseDateTimeRenderOption: config.dateTimeRenderOption
+          }, Me.options),
+          body: {
+            range: table,
+            majorDimension: config.dimension,
+            values: values
+          }
         }
-      }
-    })({spreadsheetId: config.spreadsheetId});
-  };
+      })({spreadsheetId: config.spreadsheetId, range: table});
+    }
+  );
   
-  apiObject.api.spreadsheets.values.batchClearByDataFilter = function (/* dataFilters */) {
-    return Import.Requests({
-      config: {
-        discovery: self.discoverValues('batchClearByDataFilter'),
-        oauth: 'me',
-        method: 'post',
-        body: {
-          dataFilters: Array.prototype.slice.call(arguments)
+  apiObject.api.spreadsheets.values.batchClear = self.utils.standardQueryDecorator(
+    function Me (/* clear ranges */) {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverValues('batchClear'),
+          oauth: 'me',
+          method: 'post',
+          body: {
+            ranges: Array.prototype.slice.call(arguments),
+          },
+          query: Me.options
         }
-      }
-    })({spreadsheetId: config.spreadsheetId});
-  };
+      })({spreadsheetId: config.spreadsheetId});
+    }
+  );
+  
+  apiObject.api.spreadsheets.values.batchClearByDataFilter = self.utils.standardQueryDecorator(
+    function Me (/* dataFilters */) {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverValues('batchClearByDataFilter'),
+          oauth: 'me',
+          method: 'post',
+          body: {
+            dataFilters: Array.prototype.slice.call(arguments)
+          },
+          query: Me.options
+        }
+      })({spreadsheetId: config.spreadsheetId});
+    }
+  );
   
   /*
     data is a hash where keys are the range a1notation and values are arrays of intended raw values
   */
-  apiObject.api.spreadsheets.values.batchUpdate = function (data) {
-    return Import.Requests({
-      config: {
-        discovery: self.discoverValues('batchUpdate'),
-        oauth: 'me',
-        method: 'post',
-        body: {
-          valueInputOption: config.valueInputOption,
-          includeValuesInResponse: config.includeValuesInResponse,
-          responseValueRenderOption: config.valueRenderOption,
-          responseDateTimeRenderOption: config.dateTimeRenderOption,
-          data: Object.keys(data).reduce(
-            function (acc, key) {
-              var valueRange = {};
-              valueRange = {
-                range: key,
-                majorDimension: config.dimension,
-                values: data[key]
-              };
-              acc.push(valueRange);
-              return acc;
-            }, []
-          )
+  apiObject.api.spreadsheets.values.batchUpdate = self.utils.standardQueryDecorator(
+    function Me (data) {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverValues('batchUpdate'),
+          oauth: 'me',
+          method: 'post',
+          query: Me.options,
+          body: {
+            valueInputOption: config.valueInputOption,
+            includeValuesInResponse: config.includeValuesInResponse,
+            responseValueRenderOption: config.valueRenderOption,
+            responseDateTimeRenderOption: config.dateTimeRenderOption,
+            data: Object.keys(data).reduce(
+              function (acc, key) {
+                var valueRange = {};
+                valueRange = {
+                  range: key,
+                  majorDimension: config.dimension,
+                  values: data[key]
+                };
+                acc.push(valueRange);
+                return acc;
+              }, []
+            )
+          }
         }
-      }
-    })({spreadsheetId: config.spreadsheetId});
-  };
+      })({spreadsheetId: config.spreadsheetId});
+    }
+  );
   
-  apiObject.api.spreadsheets.values.batchUpdateByDataFilter = function (dataFilters) {
-    return Import.Requests({
-      config: {
-        discovery: self.discoverValues('batchUpdateByDataFilter'),
-        oauth: 'me',
-        method: 'post',
-        body: {
-          valueInputOption: config.valueInputOption,
-          includeValueInResponse: config.includeValueInResponse,
-          responseValueRenderOption: config.valueRenderOption,
-          responseDateTimeRenderOption: config.dateTimeRenderOption,
-          data: Object.keys(dataFilters).reduce(
-            function (acc, key) {
-              var dataFilterValueRange = {
-                dataFilter: {},
-                majorDimension: config.dimension,
-                values: self.utils.array2ListValues(data[key])
-              };
-              if (typeof key == 'string')
-                dataFilterValueRange.dataFilter.a1Range = key;
-              else
-                dataFilterValueRange.developerMetadataLookup = key;
-              acc.push(dataFilterValueRange);
-              return acc;
-            }
-          )
+  apiObject.api.spreadsheets.values.batchUpdateByDataFilter = self.utils.standardQueryDecorator(
+    function Me (dataFilters) {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverValues('batchUpdateByDataFilter'),
+          oauth: 'me',
+          method: 'post',
+          query: Me.options,
+          body: {
+            valueInputOption: config.valueInputOption,
+            includeValuesInResponse: config.includeValuesInResponse,
+            responseValueRenderOption: config.valueRenderOption,
+            responseDateTimeRenderOption: config.dateTimeRenderOption,
+            data: Object.keys(dataFilters).reduce(
+              function (acc, key) {
+                var dataFilterValueRange = {
+                  dataFilter: {},
+                  majorDimension: config.dimension,
+                  values: dataFilters[key]
+                };
+                if (typeof key == 'string')
+                  dataFilterValueRange.dataFilter.a1Range = key;
+                else
+                  dataFilterValueRange.dataFilter.developerMetadataLookup = key;
+                acc.push(dataFilterValueRange);
+                return acc;
+              }, []
+            )
+          }
         }
-      }
-    })({spreadsheetId: config.spreadsheetId});
-  };
+      })({spreadsheetId: config.spreadsheetId});
+    }
+  );
 
-  apiObject.api.spreadsheets.values.clear = function (range) {
-    return Import.Requests({
-      config: {
-        discovery: self.discoverValues('clear'),
-        oauth: 'me',
-        method: 'post'
-      }
-    })({spreadsheetId: config.spreadsheetId, range: range});
-  };
-  
-  apiObject.api.spreadsheets.values.get = function (range) {
-    return Import.Requests({
-      config: {
-        discovery: self.discoverValues('get'),
-        oauth: 'me',
-        method: 'get',
-        query: {
-          valueRenderOption: config.valueRenderOption,
-          dateTimeRenderOption: config.dateTimeRenderOption,
+  apiObject.api.spreadsheets.values.clear = self.utils.standardQueryDecorator(
+    function Me (range) {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverValues('clear'),
+          oauth: 'me',
+          method: 'post',
+          query: Me.options
         }
-      }
-    })({spreadsheetId: config.spreadsheetId, range: range});
-  };
+      })({spreadsheetId: config.spreadsheetId, range: range});
+    }
+  );
   
-  apiObject.api.spreadsheets.values.batchGet = function (/* ranges */) {
-    return Import.Requests({
-      config: {
-        discovery: self.discoverValues('batchGet'),
-        oauth: 'me',
-        method: 'get',
-        query: {
-          ranges: Array.prototype.slice.call(arguments),
-          majorDimension: config.dimension,
-          valueRenderOption: config.valueRenderOption,
-          dateTimeRenderOption: config.dateTimeRenderOption
-        },
-      }
-    })({spreadsheetId: config.spreadsheetId});
-  };
+  apiObject.api.spreadsheets.values.get = self.utils.standardQueryDecorator(
+    function Me (range) {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverValues('get'),
+          oauth: 'me',
+          method: 'get',
+          query: self.augmentQueryParams({
+            valueRenderOption: config.valueRenderOption,
+            dateTimeRenderOption: config.dateTimeRenderOption,
+          }, Me.options)
+        }
+      })({spreadsheetId: config.spreadsheetId, range: range});
+    }
+  );
   
-  apiObject.api.spreadsheets.values.batchGetByDataFilter = function (/* dataFilters */) {
-    return Import.Requests({
-      config: {
-        discovery: self.discoverValues('batchGetByDataFilter'),
-        oauth: 'me',
-        method: 'post',
-        body: {
-          dataFilters: Array.prototype.slice.call(arguments),
-          majorDimension: config.dimension,
-          valueRenderOption: config.valueRenderOption,
-          dateTimeRenderOption: config.dateTimeRenderOption
-        },
-      }
-    })({spreadsheetId: config.spreadsheetId});
-  };
+  apiObject.api.spreadsheets.values.batchGet = self.utils.standardQueryDecorator(
+    function Me (/* ranges */) {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverValues('batchGet'),
+          oauth: 'me',
+          method: 'get',
+          query: self.augmentQueryParams({
+            ranges: Array.prototype.slice.call(arguments),
+            majorDimension: config.dimension,
+            valueRenderOption: config.valueRenderOption,
+            dateTimeRenderOption: config.dateTimeRenderOption
+          }, Me.options),
+        }
+      })({spreadsheetId: config.spreadsheetId});
+    }
+  );
+  
+  apiObject.api.spreadsheets.values.batchGetByDataFilter = self.utils.standardQueryDecorator(
+    function Me (/* dataFilters */) {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverValues('batchGetByDataFilter'),
+          oauth: 'me',
+          method: 'post',
+          body: {
+            dataFilters: Array.prototype.slice.call(arguments),
+            majorDimension: config.dimension,
+            valueRenderOption: config.valueRenderOption,
+            dateTimeRenderOption: config.dateTimeRenderOption
+          },
+          query: Me.options
+        }
+      })({spreadsheetId: config.spreadsheetId});
+    }
+  );
   
   /*
     
   */
-  apiObject.api.spreadsheets.values.update = function (rangeA1Notation, values) {
-    return Import.Requests({
-      config: {
-        discovery: self.discoverValues('update'),
-        oauth: 'me',
-        method: 'put',
-        query: {
-          valueInputOption: config.valueInputOption,
-          includeValuesInResponse: config.includeValuesInResponse,
-          responseValueRenderOption: config.valueRenderOption,
-          responseDateTimeRenderOption: config.dateTimeRenderOption
-        },
-        body: {
-          range: rangeA1Notation,   // "For output, this range indicates the entire requested range, even though the values will exclude trailing rows and columns"
-          majorDimension: config.dimension,
-          values: values
+  apiObject.api.spreadsheets.values.update = self.utils.standardQueryDecorator(
+    function Me (rangeA1Notation, values) {
+      return Import.Requests({
+        config: {
+          discovery: self.discoverValues('update'),
+          oauth: 'me',
+          method: 'put',
+          query: self.augmentQueryParams({
+            valueInputOption: config.valueInputOption,
+            includeValuesInResponse: config.includeValuesInResponse,
+            responseValueRenderOption: config.valueRenderOption,
+            responseDateTimeRenderOption: config.dateTimeRenderOption
+          }, Me.options),
+          body: {
+            range: rangeA1Notation,   // "For output, this range indicates the entire requested range, even though the values will exclude trailing rows and columns"
+            majorDimension: config.dimension,
+            values: values
+          }
         }
-      }
-    })({spreadsheetId: config.spreadsheetId, range: rangeA1Notation});
-  };
+      })({spreadsheetId: config.spreadsheetId, range: rangeA1Notation});
+    }
+  );
 
-  apiObject.api.spreadsheets.sheets.copyTo = function (sheetId, destinationSpreadsheetId) {
-    return Import.Requests({
-      config: {
-        discovery: {
-          name: 'sheets',
-          version: 'v4',
-          resource: 'spreadsheets.sheets',
-          method: 'copyTo',
-        },
-        oauth: 'me',
-        method: 'post',
-        body: {
-          destinationSpreadsheetId: destinationSpreadsheetId,   // "For output, this range indicates the entire requested range, even though the values will exclude trailing rows and columns"
+  apiObject.api.spreadsheets.sheets.copyTo = self.utils.standardQueryDecorator(
+    function Me (sheetId, destinationSpreadsheetId) {
+      return Import.Requests({
+        config: {
+          discovery: {
+            name: 'sheets',
+            version: 'v4',
+            resource: 'spreadsheets.sheets',
+            method: 'copyTo',
+          },
+          oauth: 'me',
+          method: 'post',
+          body: {
+            destinationSpreadsheetId: destinationSpreadsheetId,   // "For output, this range indicates the entire requested range, even though the values will exclude trailing rows and columns"
+          },
+          query: Me.options
         }
-      }
-    })({spreadsheetId: config.spreadsheetId});
-  };
+      })({spreadsheetId: config.spreadsheetId});
+    }
+  );
   
   return apiObject;
 }, 
 
-{
+{ // private methods
   disc: function (resource, method) {
     return {
       name: 'sheets',
@@ -362,13 +386,35 @@ function Package (config) {
     return this.disc('spreadsheets.values', method)
   },
   
+  augmentQueryParams: function (primaryOptions, secondaryOptions) {
+    var ret = {};
+    Object.keys(secondaryOptions).forEach(function (prop) {
+      ret[prop] = secondaryOptions[prop];
+    });
+    Object.keys(primaryOptions).forEach(function (prop) {
+      ret[prop] = primaryOptions[prop];
+    });
+    return ret;
+  },
+  
+  
+  // public methods; added to instance
   utils: {
-    convertMetadataValue: function (value) {
-      return JSON.stringify(value);
+  
+    standardQueryDecorator: function (func) {
+      func.options = {
+        fields: '*',
+        prettyPrint: false  // set here because logging is actually easier
+      };
+      func.setOption = function (name, value) {
+        func.options[name] = value;
+      };
+      func.getOption = function (name) {
+        return func.options[name];
+      };
+      return func;
     },
-    revertMetadataValue: function (value) {
-      return JSON.parse(value);      
-    },
+  
     listValues2array: function (listValues) {
       return listValues.reduce(
         function (acc, valueObj) {
@@ -422,7 +468,12 @@ function Package (config) {
         config: {
             spreadsheetId: id
         }
-    })
+    });
+  },
+  
+  new_: function () {
+    var ss = this().api.spreadsheets.create();
+    return this.fromId(ss.json().spreadsheetId);
   },
   
   
