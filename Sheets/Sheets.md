@@ -35,9 +35,9 @@ var sheet = Import.Sheets.new_();  // from scratch
 var sheet = Import.Sheets.fromId(spreadsheeetId);  // from existing
 ```
 
-#### Top-level spreadsheet endpoints:
+### Top-level spreadsheet endpoints:
 
-[spreadsheets.get](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/get)
+[spreadsheets.get](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/get):
 
 ```js
 /**
@@ -47,7 +47,7 @@ var sheet = Import.Sheets.fromId(spreadsheeetId);  // from existing
 sheet.api.spreadsheets.get();
 ```
 
-[spreadsheets.create](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/create)
+[spreadsheets.create](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/create):
 
 ```js
 /**
@@ -59,7 +59,7 @@ sheet.api.spreadsheets.get();
 sheet.api.spreadsheets.create(spreadsheetResource);
 ```
 
-[spreadsheets.batchUpdate](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/batchUpdate)
+[spreadsheets.batchUpdate](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/batchUpdate):
 
 ```js
 /**
@@ -74,7 +74,7 @@ sheet.api.spreadsheets.create(spreadsheetResource);
 sheet.api.spreadsheets.batchUpdate(requests);
 ```
 
-[spreadsheets.getByDataFilter](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/getByDataFilter)
+[spreadsheets.getByDataFilter](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/getByDataFilter):
 
 ```js
 /**
@@ -87,9 +87,9 @@ sheet.api.spreadsheets.batchUpdate(requests);
 sheet.api.spreadsheets.getByDataFilter(dataFilters);
 ```
 
-#### Values endpoints:
+### Values endpoints:
 
-[spreadsheets.values.get](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/get)
+[spreadsheets.values.get](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/get):
 
 ```js
 /**
@@ -100,7 +100,7 @@ sheet.api.spreadsheets.getByDataFilter(dataFilters);
 sheet.api.spreadsheets.values.get(range);
 ```
 
-[spreadsheets.values.update](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/update)
+[spreadsheets.values.update](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/update):
 
 ```js
 /**
@@ -112,7 +112,7 @@ sheet.api.spreadsheets.values.get(range);
 sheet.api.spreadsheets.values.update(range, values);
 ```
 
-[spreadsheets.values.append](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/append)
+[spreadsheets.values.append](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/append):
 
 ```js
 /**
@@ -124,7 +124,7 @@ sheet.api.spreadsheets.values.update(range, values);
 sheet.api.spreadsheets.values.append(table, values);
 ```
 
-[spreadsheets.values.clear](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/clear)
+[spreadsheets.values.clear](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/clear):
 
 ```js
 /**
@@ -137,7 +137,7 @@ sheet.api.spreadsheets.values.append(table, values);
 sheet.api.spreadsheets.values.clear(range);
 ```
 
-[spreadsheets.values.batchGet](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchGet)
+[spreadsheets.values.batchGet](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchGet):
 
 ```js
 /**
@@ -148,7 +148,7 @@ sheet.api.spreadsheets.values.clear(range);
 sheet.api.spreadsheets.values.batchGet(ranges);
 ```
 
-[spreadsheets.values.batchUpdate](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchUpdate)
+[spreadsheets.values.batchUpdate](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchUpdate):
 
 ```js
 /**
@@ -160,7 +160,7 @@ sheet.api.spreadsheets.values.batchGet(ranges);
 sheet.api.spreadsheets.values.batchUpdate(data);
 ```
 
-[spreadsheets.values.batchClear](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchClear)
+[spreadsheets.values.batchClear](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchClear):
 
 ```js
 /**
@@ -171,7 +171,7 @@ sheet.api.spreadsheets.values.batchUpdate(data);
 sheet.api.spreadsheets.values.batchClear(clearRanges);
 ```
 
-[spreadsheets.values.batchGetByDataFilter](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchClearByDataFilter)
+[spreadsheets.values.batchGetByDataFilter](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchClearByDataFilter):
 
 ```js
 /**
@@ -182,7 +182,7 @@ sheet.api.spreadsheets.values.batchClear(clearRanges);
 sheet.api.spreadsheets.values.batchGetByDataFilter(dataFilters);
 ```
 
-[spreadsheets.values.batchUpdateByDataFilter](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchUpdateByDataFilter)
+[spreadsheets.values.batchUpdateByDataFilter](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchUpdateByDataFilter):
 
 ```js
 /**
@@ -193,7 +193,7 @@ sheet.api.spreadsheets.values.batchGetByDataFilter(dataFilters);
 sheet.api.spreadsheets.values.batchUpdateByDataFilter(dataFilters);
 ```
 
-[spreadsheets.values.batchClearByDataFilter](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchClearByDataFilter)
+[spreadsheets.values.batchClearByDataFilter](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchClearByDataFilter):
 
 ```js
 /**
@@ -204,9 +204,9 @@ sheet.api.spreadsheets.values.batchUpdateByDataFilter(dataFilters);
 sheets.api.spreadsheets.values.batchClearByDataFilter(dataFilters);
 ```
 
-#### Developer metadata endpoints:
+### Developer metadata endpoints:
 
-[spreadsheets.developerMetadata.get](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.developerMetadata/get)
+[spreadsheets.developerMetadata.get](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.developerMetadata/get):
 
 ```js
 /**
@@ -218,7 +218,7 @@ sheets.api.spreadsheets.values.batchClearByDataFilter(dataFilters);
 sheet.api.spreadsheets.developerMetadata.get(id);
 ```
 
-[spreadsheets.developerMetadata](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.developerMetadata/search)
+[spreadsheets.developerMetadata](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.developerMetadata/search):
 
 ```js
 /**
@@ -229,9 +229,9 @@ sheet.api.spreadsheets.developerMetadata.get(id);
 sheet.api.spreadsheets.developerMetadata.search(dataFilters);
 ```
 
-#### Spreadsheet.sheets endpoints:
+### Spreadsheet.sheets endpoints:
 
-[spreadsheets.sheets.copyTo](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.sheets/copyTo)
+[spreadsheets.sheets.copyTo](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.sheets/copyTo):
 
 ```js
 /**
