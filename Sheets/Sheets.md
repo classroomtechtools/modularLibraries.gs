@@ -4,7 +4,7 @@ Interacting with Google Sheets api, made a cinch.
 
 ## Quickstart
 
-Copy the code, also copy the Requests.gs code (prerequisite), enable the sheets api in the console. Use it:
+Copy [this library's code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Sheets/Sheets.gs), also copy the [Requests.gs library code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Requests/Requests.md) (it's a dependency), enable the sheets api in the console. Use it:
 
 ```js
 var Sheets, sheet, response;
