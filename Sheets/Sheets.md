@@ -42,7 +42,7 @@ var sheet = Import.Sheets.fromId(spreadsheeetId);  // from existing
 ```js
 /**
  * Returns the spreadsheet at the given ID
- * @returns {Object} Spreadsheet - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets#Spreadsheet
+ * @returns {Spreadsheet} - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets#Spreadsheet
  */
 sheet.api.spreadsheets.get();
 ```
@@ -52,9 +52,10 @@ sheet.api.spreadsheets.get();
 ```js
 /**
  * Creates a spreadsheet, returning the newly created spreadsheet
- * @param {Object} [Spreadsheet] - A spreadsheet resource object, which
- *                 can be used to define a new spreadsheet declaratively (useful for  
- *                 testing)
+ * @param {Object}        [Spreadsheet] - A spreadsheet resource object, which
+ *                        can be used to define a new spreadsheet declaratively (useful for
+ *                        testing)
+ * @returns {Spreadsheet} - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets#Spreadsheet 
  */
 sheet.api.spreadsheets.create(spreadsheetResource);
 ```
@@ -64,12 +65,14 @@ sheet.api.spreadsheets.create(spreadsheetResource);
 ```js
 /**
  * Applies one or more updates to the spreadsheet
- * @param {Object[]} requests - A list of request objects
- * @param {Object}   [opt]
- * @param {Bool}     [opt.includeSpreadsheetInResponse=false] - true if you want values back
- * @param {Bool}     [opt.responseIncludeGridData=false]
- * @param {String[]} [opt.responseRanges=[]] - Info to return in response
- * @returns {Object} Spreadsheet - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets#Spreadsheet
+ * @param   {Object[]}    requests - A list of request objects
+ * @param   {Object}      [opt]
+ * @param   {Bool}        [opt.includeSpreadsheetInResponse=false] - true if you want values back 
+ * @param   {Bool}        [opt.responseIncludeGridData=false]
+ * @param   {String[]}    [opt.responseRanges=[]] - Info to return in response
+ * @returns {Object}      responseObject
+ *          {Response[]}  responseObject.replies - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/response#Response
+ *          {Spreadsheet} response.updatedSpreadsheet - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets#Spreadsheet
  */
 sheet.api.spreadsheets.batchUpdate(requests);
 ```
@@ -81,8 +84,8 @@ sheet.api.spreadsheets.batchUpdate(requests);
  *	Returns the spreadsheet at the given ID.
  *  This method differs from spreadsheets.get in that it allows selecting 
  *  which subsets of spreadsheet data to return by specifying a dataFilters parameter.
- * @param {Object[]} dataFilters
- * @returns {Object.dataFilters} DataFilter - https://developers.google.com/sheets/api/reference/rest/v4/DataFilter
+ * @param   {DataFilter[]} - https://developers.google.com/sheets/api/reference/rest/v4/DataFilter
+ * @returns {Spreadsheet}  - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets#Spreadsheet 
  */
 sheet.api.spreadsheets.getByDataFilter(dataFilters);
 ```
@@ -94,8 +97,8 @@ sheet.api.spreadsheets.getByDataFilter(dataFilters);
 ```js
 /**
  * Returns a range of values from a spreadsheet.
- * @param {String} range - a1notation of range to get
- * @returns {Object} ValueRange - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values#ValueRange
+ * @param   {String}     range - a1notation of range to get
+ * @returns {ValueRange} - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values#ValueRange
  */
 sheet.api.spreadsheets.values.get(range);
 ```
@@ -105,9 +108,9 @@ sheet.api.spreadsheets.values.get(range);
 ```js
 /**
  * Sets values in a range of a spreadsheet.
- * @param {String} range - a1notation
- * @param {Any[][]} values
- * @returns {Object} UpdateValuesResponse - https://developers.google.com/sheets/api/reference/rest/v4/UpdateValuesResponse
+ * @param   {String}               range - a1notation
+ * @param   {Any[][]}              values
+ * @returns {UpdateValuesResponse} - https://developers.google.com/sheets/api/reference/rest/v4/UpdateValuesResponse
  */
 sheet.api.spreadsheets.values.update(range, values);
 ```
@@ -117,9 +120,9 @@ sheet.api.spreadsheets.values.update(range, values);
 ```js
 /**
  * Returns the spreadsheet at the given ID: 
- * @param {String} table - a1notation for range "table" to append (can be just sheet name)
- * @param {Any[][]} values - The raw values to append
- * @returns {Object} ValueRange - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values#ValueRange
+ * @param   {String}     table - a1notation for range "table" to append (can be just sheet name)
+ * @param   {Any[][]}    values - The raw values to append
+ * @returns {ValueRange} - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values#ValueRange
  */
 sheet.api.spreadsheets.values.append(table, values);
 ```
@@ -131,8 +134,9 @@ sheet.api.spreadsheets.values.append(table, values);
  * Appends values to a spreadsheet. The input range is used to search for existing data 
  * and find a "table" within that range. Values will be appended to the next row of the 
  * table, starting with the first column of the table.
- * @param {String} range - a1notation of range to clear
- * @returns {Object} Object.clearedRange - String
+ * @param   {String} range - a1notation of range to clear
+ * @returns {Object} responseObject
+ *          {String} responseObject.clearedRange - a1notation
  */
 sheet.api.spreadsheets.values.clear(range);
 ```
@@ -142,8 +146,8 @@ sheet.api.spreadsheets.values.clear(range);
 ```js
 /**
  * Returns one or more ranges of values from a spreadsheet. 
- * @param {...String} ranges - a1notation of ranges
- * @returns {Object[]} valueRanges - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values#ValueRange
+ * @param   {...String}     ranges - a1notation of ranges
+ * @returns {ValueRanges[]} - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values#ValueRange
  */
 sheet.api.spreadsheets.values.batchGet(ranges);
 ```
@@ -153,9 +157,10 @@ sheet.api.spreadsheets.values.batchGet(ranges);
 ```js
 /**
  * Sets values in one or more ranges of a spreadsheet.
- * @param {Object} data - Keys are ranges, values are values
- * @returns {Object.responses[]} UpdateValuesResponse - https://developers.google.com/sheets/api/reference/rest/v4/UpdateValuesResponse
- *          {Object.totalUpdated(Rows/Columns/Cells/Sheets)}
+ * @param   {Object}                  data - Keys are ranges, values are values
+ * @returns {Object}        responseObj 
+ *          {Number}        responseObj.totalUpdated(Rows/Columns/Cells/Sheets)}
+ * {UpdateValuesResponse[]} responseObj.responses - https://developers.google.com/sheets/api/reference/rest/v4/
  */
 sheet.api.spreadsheets.values.batchUpdate(data);
 ```
@@ -165,8 +170,9 @@ sheet.api.spreadsheets.values.batchUpdate(data);
 ```js
 /**
  * Clears one or more ranges of values from a spreadsheet.
- * @param {...String} clearRanges - a1Notation for range to clear
- * @returns {Object.clearedRanges[]{String}}
+ * @param   {...String} clearRanges - a1Notation for range to clear
+ * @returns {Object}    responseObj
+ *          {String[]}  responseObj.clearedRanges
  */
 sheet.api.spreadsheets.values.batchClear(clearRanges);
 ```
@@ -176,8 +182,9 @@ sheet.api.spreadsheets.values.batchClear(clearRanges);
 ```js
 /**
  * Returns one or more ranges of values that match the specified data filters.
- * @param {...Object} dataFilters - Hello
- * @returns {Object.valueRanges[]{MatchedValueRange}} - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchGetByDataFilter#MatchedValueRange
+ * @param    {...Object} dataFilters - Hello
+ * @returns  {Object}    responseObj
+ * {MatchedValueRange[]} responseObj.valuesRanges - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchGetByDataFilter#MatchedValueRange
  */
 sheet.api.spreadsheets.values.batchGetByDataFilter(dataFilters);
 ```
@@ -187,8 +194,9 @@ sheet.api.spreadsheets.values.batchGetByDataFilter(dataFilters);
 ```js
 /**
  * Sets values in one or more ranges of a spreadsheet.
- * @param {...Object} dataFilters
- * @returns {Object.response[]{UpdateValuesByDataFilterRepsonse}}
+ * @param   {...Object}                 dataFilters
+ * @returns {Object}                    responseObj
+ * {UpdateValuesByDataFilterRepsonse[]} responseObj.response - https://forward2.herokuapp.com/developers/sheets/api/reference/rest/v4/spreadsheets.values/batchUpdateByDataFilter#UpdateValuesByDataFilterResponse
  */
 sheet.api.spreadsheets.values.batchUpdateByDataFilter(dataFilters);
 ```
@@ -198,8 +206,9 @@ sheet.api.spreadsheets.values.batchUpdateByDataFilter(dataFilters);
 ```js
 /**
  * Clears one or more ranges of values from a spreadsheet.
- * @param {...Object} dataFilters - dataFilter objects that defines ranges to clear
- * @returns {Object.clearedRanges[]{String}} 
+ * @param   {...Object} dataFilters - dataFilter objects that defines ranges to clear
+ * @returns {Object}    responseObj
+ *          {String[]}  responseObj.clearedRanges
  */
 sheets.api.spreadsheets.values.batchClearByDataFilter(dataFilters);
 ```
@@ -212,19 +221,20 @@ sheets.api.spreadsheets.values.batchClearByDataFilter(dataFilters);
 /**
  * Returns the developer metadata with the specified ID.
  * Get the developer metadata info by id
- * @param {Number} id
- * @returns {Object} DeveloperMetadata - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.developerMetadata#DeveloperMetadata
+ * @param   {Number}            id
+ * @returns {DeveloperMetadata} - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.developerMetadata#DeveloperMetadata
  */
 sheet.api.spreadsheets.developerMetadata.get(id);
 ```
 
-[spreadsheets.developerMetadata](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.developerMetadata/search):
+[spreadsheets.developerMetadata.search](https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.developerMetadata/search):
 
 ```js
 /**
  * Returns the developer metadata with the specified ID.
- * @param {...Object} dataFilters - info to retrieve
- * @returns {Object.matchedDeveloperMetadata} MatchedDeveloperMetadaata - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.developerMetadata/search#MatchedDeveloperMetadataspreadsheets.developerMetadata#DeveloperMetadata
+ * @param   {...Object}       dataFilters - info to retrieve
+ * @returns {Object}          responseObj
+ * {MatchedDeveloperMetadata} responseObj.matchedDeveloperMetadata - https://forward2.herokuapp.com/developers/sheets/api/reference/rest/v4/spreadsheets.developerMetadata/search#MatchedDeveloperMetadata
  */
 sheet.api.spreadsheets.developerMetadata.search(dataFilters);
 ```
@@ -236,9 +246,9 @@ sheet.api.spreadsheets.developerMetadata.search(dataFilters);
 ```js
 /**
  * Copies a single sheet from a spreadsheet to another spreadsheet
- * @param {Number} sheetId
- * @param {Number} destinationSpreadsheetId
- * @returns {Object} SheetProperties - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets#SheetProperties
+ * @param   {Number}          sheetId
+ * @param   {Number}          destinationSpreadsheetId
+ * @returns {SheetProperties} - https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets#SheetProperties
  */
 api.spreadsheets.sheets.copyTo(sheetId, destinationSpreadsheetId);
 ```
