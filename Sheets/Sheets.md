@@ -81,7 +81,7 @@ sheet.api.spreadsheets.batchUpdate(requests, opt);
 
 ```js
 /**
- *	Returns the spreadsheet at the given ID.
+ * Returns the spreadsheet at the given ID.
  *  This method differs from spreadsheets.get in that it allows selecting 
  *  which subsets of spreadsheet data to return by specifying a dataFilters parameter.
  * @param   {DataFilter[]} dataFilters - https://developers.google.com/sheets/api/reference/rest/v4/DataFilter
