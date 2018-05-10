@@ -21,7 +21,7 @@ function SheetsPackage_ (config) {
   apiObject.utils = self.utils;
   
   // 
-  // Spreadsheets
+  // Spreadsheets 
   //
   apiObject.api.spreadsheets.create = self.utils.standardQueryDecorator(
     function Me (spreadsheet) {
@@ -56,7 +56,7 @@ function SheetsPackage_ (config) {
       opt = opt || {};
       opt.includeSpreadsheetInResponse = opt.includeSpreadsheetInResponse || false;
       opt.responseIncludeGridData = opt.responseIncludeGridData || false;
-      opt.responseRanges = opt.responseRanges || '';
+      opt.responseRanges = opt.responseRanges || [];
   
       return Import.Requests({
         config: {
@@ -401,6 +401,9 @@ function SheetsPackage_ (config) {
   // public methods; added to instance
   utils: {
   
+    /*
+      See here for explanation: https://gist.github.com/brainysmurf/818dac872a5a79f89c2bba8595f125d7
+    */
     standardQueryDecorator: function (func) {
       func.options = {
         fields: '*',
@@ -408,6 +411,12 @@ function SheetsPackage_ (config) {
       };
       func.setOption = function (name, value) {
         func.options[name] = value;
+      };
+      func.setFieldsOption = function (value) {
+        func.options['fields'] = value;
+      };
+      func.getOptions = function () {
+        return func.options;
       };
       func.getOption = function (name) {
         return func.options[name];
