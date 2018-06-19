@@ -9,7 +9,7 @@ This repo consists of:
 
 ### Import.gs
 
-A Google Apps Script solution to writing and using modular libraries so that apps can better manage code reuse. All the below libraries use this as a framework. [[Link](http://example.com)]
+A Google Apps Script solution to writing and using modular libraries so that apps can better manage code reuse. All the below libraries use this as a framework. [[Link](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Import/Import.md)]
 
 ### Requests.gs
 
