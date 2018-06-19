@@ -1,6 +1,6 @@
 # Dotmitizer.gs
 
-Convert an array of json objects into spreadsheet-friendly array of arrays, where the first row represents the column headers, and the reamining rows are the respective values per each json. The column names use dot (and brace) notation to specify the path for nested objects, hence the name.
+Convert an array of json objects into spreadsheet-friendly array of arrays, where the first row represents the column headers, and the remaining rows are the respective values per each json. The column names use dot (and brace) notation to specify the path for nested objects, hence the name.
 
 Rows that do not originally contain values for columns that appear in other objects are assigned as `null`.
 
