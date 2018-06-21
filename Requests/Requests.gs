@@ -290,7 +290,6 @@ function RequestsPackage_ (config) {
     _options.body = _options.body || {};
     _options.headers = _options.headers || null;
     _options.query = _options.query || {};
-    _options.repeatingQuery = _options.repeatingQuery || {};
 
     var toParams;
 
