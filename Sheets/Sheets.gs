@@ -15,6 +15,7 @@ function SheetsPackage_ (config) {
   
   var self = this;
   var apiObject, getendpoints, methods;
+  var Requests = Import.Requests;
   apiObject = {api: {spreadsheets: {values: {}, sheets: {/* TBI */}, developerMetadata: {}}},
                getValues: {}, metadata: {}};
      
@@ -26,7 +27,7 @@ function SheetsPackage_ (config) {
   apiObject.api.spreadsheets.create = self.utils.standardQueryDecorator(
     function Me (spreadsheet) {
       spreadsheet = spreadsheet || {properties: {title: config.defaultTitle}};
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverSpreadsheet('create'),
           oauth: 'me',
@@ -40,7 +41,7 @@ function SheetsPackage_ (config) {
   
   apiObject.api.spreadsheets.get = self.utils.standardQueryDecorator(
     function Me () {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverSpreadsheet('get'),
           oauth: 'me',
@@ -58,7 +59,7 @@ function SheetsPackage_ (config) {
       opt.responseIncludeGridData = opt.responseIncludeGridData || false;
       opt.responseRanges = opt.responseRanges || [];
   
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverSpreadsheet('batchUpdate'),
           oauth: 'me',
@@ -77,7 +78,7 @@ function SheetsPackage_ (config) {
     
   apiObject.api.spreadsheets.getByDataFilter = self.utils.standardQueryDecorator(
     function Me (dataFilters) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverSpreadsheet('getByDataFilter'),
           oauth: 'me',
@@ -95,7 +96,7 @@ function SheetsPackage_ (config) {
   apiObject.api.spreadsheets.developerMetadata.get = self.utils.standardQueryDecorator(
     function Me (id) {
       var response;
-      response = Import.Requests({
+      response = Requests({
         config: {
           discovery: self.discoverDevMetadata('get'),
           oauth: 'me',
@@ -111,7 +112,7 @@ function SheetsPackage_ (config) {
   apiObject.api.spreadsheets.developerMetadata.search = self.utils.standardQueryDecorator(
     function Me (/*dataFilters*/) {
       var response;
-      response = Import.Requests({
+      response = Requests({
         config: {
           discovery: self.discoverDevMetadata('search'),
           oauth: 'me',
@@ -129,7 +130,7 @@ function SheetsPackage_ (config) {
   
   apiObject.api.spreadsheets.values.append = self.utils.standardQueryDecorator(
     function Me (table, values) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverValues('append'),
           oauth: 'me',
@@ -153,7 +154,7 @@ function SheetsPackage_ (config) {
   
   apiObject.api.spreadsheets.values.batchClear = self.utils.standardQueryDecorator(
     function Me (/* clear ranges */) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverValues('batchClear'),
           oauth: 'me',
@@ -169,7 +170,7 @@ function SheetsPackage_ (config) {
   
   apiObject.api.spreadsheets.values.batchClearByDataFilter = self.utils.standardQueryDecorator(
     function Me (/* dataFilters */) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverValues('batchClearByDataFilter'),
           oauth: 'me',
@@ -188,7 +189,7 @@ function SheetsPackage_ (config) {
   */
   apiObject.api.spreadsheets.values.batchUpdate = self.utils.standardQueryDecorator(
     function Me (data) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverValues('batchUpdate'),
           oauth: 'me',
@@ -219,7 +220,7 @@ function SheetsPackage_ (config) {
   
   apiObject.api.spreadsheets.values.batchUpdateByDataFilter = self.utils.standardQueryDecorator(
     function Me (dataFilters) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverValues('batchUpdateByDataFilter'),
           oauth: 'me',
@@ -253,7 +254,7 @@ function SheetsPackage_ (config) {
 
   apiObject.api.spreadsheets.values.clear = self.utils.standardQueryDecorator(
     function Me (range) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverValues('clear'),
           oauth: 'me',
@@ -266,7 +267,7 @@ function SheetsPackage_ (config) {
   
   apiObject.api.spreadsheets.values.get = self.utils.standardQueryDecorator(
     function Me (range) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverValues('get'),
           oauth: 'me',
@@ -282,7 +283,7 @@ function SheetsPackage_ (config) {
   
   apiObject.api.spreadsheets.values.batchGet = self.utils.standardQueryDecorator(
     function Me (/* ranges */) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverValues('batchGet'),
           oauth: 'me',
@@ -300,7 +301,7 @@ function SheetsPackage_ (config) {
   
   apiObject.api.spreadsheets.values.batchGetByDataFilter = self.utils.standardQueryDecorator(
     function Me (/* dataFilters */) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverValues('batchGetByDataFilter'),
           oauth: 'me',
@@ -322,7 +323,7 @@ function SheetsPackage_ (config) {
   */
   apiObject.api.spreadsheets.values.update = self.utils.standardQueryDecorator(
     function Me (rangeA1Notation, values) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: self.discoverValues('update'),
           oauth: 'me',
@@ -345,7 +346,7 @@ function SheetsPackage_ (config) {
 
   apiObject.api.spreadsheets.sheets.copyTo = self.utils.standardQueryDecorator(
     function Me (sheetId, destinationSpreadsheetId) {
-      return Import.Requests({
+      return Requests({
         config: {
           discovery: {
             name: 'sheets',
