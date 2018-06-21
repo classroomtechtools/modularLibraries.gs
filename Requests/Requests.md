@@ -1,32 +1,44 @@
 # Requests.gs
 
-A modular library for Google Apps Scripting that makes external requests a cinch.
+A modular library for Google Apps Scripting that wraps `UrlFetchApp.fetch`. Other than using it for external requests, it can also be deployed to interact with Google APIs through the discovery service, as well as other json-based APIs. You can even use it to implement concurrent processing as it also wraps `UrlFetchApp.fetchAll`.
 
-## Requests.gs Quickstart
+## Quickstart
 
 Grab the [code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Requests/Requests.gs), put into your project, and then make http requests:
 
 ```js
-var requestsLibrary = Import.Requests();
-var response = requestsLibrary
-		       .get(url);        // ... or...
-		//     .get(url, {query: {q:''});
-		//     .post(url, {body: {param: 'param'}});
-		//     .put(url);
-		//     .delete_(url);
-		//     .head(url);
-		//     .options(url);
+var RequestsLib, libInstance, http, response;
+RequestsLib = Import.Requests;
+http = RequestsLib();
+response = http
+               .get(url);        // ... or...
+        //     .get(url, {query: {q:''});
+        //     .post(url, {body: {param: 'param'}});
+        //     .put(url);
+        //     .delete_(url);
+        //     .head(url);
+        //     .options(url);
 ```
 
-The `response` object has `.text` and `.json` available to retrieve the actual content. Additionally, there are some configuration options in the `Import.Requests` constructor: 
+A `response` object is returned, which has `json` and `text` methods to retrieve the content.
 
-- Template the url for expansion (less typing):
+## Individual Requests
+
+A library instance contains methods for each of the http requests: `get`, `post`, `put`, `delete_`, `head` and `options` methods which has a `url` parameter (`String`) with optional `options` second parameter (`Object`). They return a `response` object — unless you override that behaviour by specifying a `method` property in the options object, in which case it returns the http method itself.
+
+The `options` parameter can have `headers`, `body`, and `query` properties. All of these are standard usage for http requests. Their values are all assumed to be objects. If you need a query that repeats itself, pass an array to the value of query key instead of a string.
+
+### Templated Urls
+
+An alternative pattern is available for where instead of the `url` parameter of the http requests being a string, it is an object whose properties are expanded based on the `baseUrl` passed as a `config` to the library reference:
+
+Example with a get request:
 
 ```js
 var exampleDotCom, response;
 exampleDotCom = Import.Requests({
   config: {
-    baseUrl:'http://example.com/{uri}'  // define the template
+    baseUrl: 'http://example.com/{uri}'  // define the template
   }
 });
 response = exampleDotCom.get({
@@ -35,7 +47,7 @@ response = exampleDotCom.get({
 response.json();
 ```
 
-- Call out to an API service with a `post` request, where the body needs a title passed to it:
+Example with a post request:
 
 ```js
 var json = exampleDotCom.post({
@@ -46,79 +58,119 @@ var json = exampleDotCom.post({
 }).json();
 ```
 
-- Save the post request for repeated use, by passing `false` in the last parameter in the `.post` method. The returned object has the method `.fetch` is available when you're ready to actually call out to the internet.
+### Manually fetch
+
+If you want to define an http method that does not actually reach out to the internet until you manually fetch it yourself, pass `false` in the third parameter (and pass `null` to the second if not utilizing options). Instead of returning a `response` object it returns a `request` object with a `fetch` method that can be invoked at a later time (with no parameters, that then returns the `response` object).
+
+Example with a post request:
 
 ```js
-var postRequest = exampleDotCom.post({
+var postRequest, response1, response2;
+postRequest = exampleDotCom.post({
   endpoint: 'new/article/endpoint',
-}, null, false);
+}, null, false);  // pass null as the second parameter if not utilized
 
 var response1 = postRequest({
   body: {
     title: 'Another new article'
   }
-}).fetch().json();
+});
 var response2 = postRequest({
   body: {
     title: "Yet another new article"
   }
-}).fetch().json();
+});
+response1.fetch().json();
+response2.fetch().json();
 ```
 
-- Put common headers required for each call, once:
+### Create an invokable method
+
+Similar to the above, you can alternatively specify a `method` property in the `config` object at library invocation time. Requests interprets this to mean that instead of a `response` you are expecting a reference to the http method itself:
 
 ```js
-var endpointWithAuth = Import.Requests({
-  baseUrl:'http://example.com/{endpoint}',
-  headers: {
-    auth_token: 'secret'
+var RequestsLib, post, response;
+RequestsLib = Import.Requests;
+post = RequestsLib({
+  config: {
+    method: 'post'
   }
 });
-// all subsequent use of endpointWithAuth has authentication token 
-// in the header
 
-var allArticles = endpointWithAuth.post({endpoint: 'articles'}).get().json();
+response = post(url, {
+  headers: {
+    Authentication: 'oauthToken'
+  }
+});
+response.json();
 ```
 
-- For debugging, inspect the parameters of the call (that would get sent to `UrlFetchAll.fetch`):
+### Manually fetching vs. creating invokable method
+
+While their usage cases are similiar in that we are delaying when the software actually reaches out to the internet, they are actually implemented at different layers and thus have one key side effect. 
+
+Notice that with manually fetching, you don't pass a `url` parameter when invoking the request, since it's already been defined. Whereas when you invoke the created method, you are expected to pass a `url` parameter, and is subject to expansion if `baseUrl` is defined and `url` is an object.
+
+### Debugging methods
+
+For debugging, inspect the parameters of the call (that would get sent to `UrlFetchAll.fetch`):
 
 ```js
 var postRequest = destination.post({
   endpoint: 'new/article/endpoint',
 }, null, false);
 postRequest.params();  // returns object that would be passed to UrlFetchApp.fetch
+postRequest.params(true);  // same as above, including the url
 ```
 
 ## Batch operations
 
-Instead of making one request at a time, you can leverage `.batch` to make asyncronous calls. The idea is to create an array of items that instructs Requests how to compile a list of HttpRequests which is just passed to `UrlFetchApp.fetchAll` under the hood. Each item is an object, where the properties are used in the url template:
+Instead of using one of the http methods one at a time, you can leverage `.batch` to make asyncronous calls. 
+
+The idea is to create an array of `items` which you pass to `batch` which uses it to compile a list of requests as required by `UrlFetchApp.fetchAll`. Each item is an object, where the top-level properties are used to expand the template defined in `urlTemplate`:
 
 ```js
-var urlTemplate = 'http://example.com/{category}/{articleId}';
-var articleGetter = Import.Requests();
-var articleIds = ['123', '234', '456'];
-var items = articleIds.reduce(function (acc, num, index) {
+var RequestsLib, articleGetter, urlTemplate, articleIds, oauthToken, items, responses;
+RequestsLib = Import.Requests;
+articleUpdater = RequestsLib();
+urlTemplate = 'http://{domain}/{category}/{articleId}';
+articleIds = ['123', '234', '456'];
+oathToken = 'abc';
+
+// build items that according to this api is needed to make articles
+items = articleIds.reduce(function (acc, id) {
   acc.push({
-  	articleId: num,
-  	category: 'articles',
+    domain: 'example.com',
+    articleId: id,
+    category: 'articles',
+    options: {
+      method: 'post',  // 'get' is default
+      body: {
+        text: 'updated contents to be this text',
+      },
+      headers: {
+        'Authentication': oauthToken
+      }
+    }
   });
   return acc;	
 });
-var responses = articleGetter.batch(urlTemplate, items);
-responses.zip('articles');  // array of articles returned
+responses = articleUpdater.batch(urlTemplate, items);
 ```
 
-If there are specific options to the particular request, then just add an `options` property to the item.
+If there are specific options to the particular request, such as a header, body, or query, then just add an `options` property to the item. Be sure to indicate what kind of http request this is by specifying the `method` property.
+
 
 ## Interacting with Google APIs
 
-Let's make our own objects to interact with Google Apis we need. We're going to create a thing that can create and delete files from the drive. By using the discovery api, we can "discover" the url needed for a particular endpoint. However, the urls are often (usually) templated, with something like `blahblah.com/files/{fileId}`, but some not. For example, creating a file in the drive is just `files` but deleting it is `files/{fileId}`.
+Let's make our own javascript object to interact with Google Apis we need. We're going to create a namespace that can create and delete files from the drive. By using the discovery api, we can "discover" the url needed for a particular endpoint. However, the urls are often (usually) templated, with something like `blahblah.com/files/{fileId}`, but some not. For example, creating a file in the drive is just `files` but deleting it is `files/{fileId}`.
 
-A script that creates a file and promptly deletes it is demonstrated below. Note that the `base` and `attr` options of Import.gs are used, as well as our `config.method`:
+A script that creates a file and promptly deletes it is demonstrated below. Note that the `base` and `attr` options of Import.gs are used, as well as our `config.method`, which allows us to create invokable methods:
 
 ```js
+  var RequestsLib = Import.Requests;
   var DriveApi = {}, result;
-  Import.Requests({
+  RequestsLib({
     base: DriveApi,
     attr: 'createFile',
     config: {
@@ -132,7 +184,7 @@ A script that creates a file and promptly deletes it is demonstrated below. Note
       method: 'post'
     }
   });
-  Import.Requests({
+  RequestsLib({
     base: DriveApi,
     attr: 'deleteFile',
     config: {
@@ -154,7 +206,7 @@ A script that creates a file and promptly deletes it is demonstrated below. Note
   DriveApi.deleteFile({fileId: result.id});
 ```
 
-Use the [Discovery API explorer](https://developers.google.com/apis-explorer/#p/discovery/v1/discovery.apis.getRest) and/or the reference documentation to figure out how to interact with specific endpoints. Note that use of the discovery endpoint means an additional network roundtrip in your script.
+Use the [Discovery API explorer](https://developers.google.com/apis-explorer/#p/discovery/v1/discovery.apis.getRest) and/or the reference documentation to figure out how to interact with specific endpoints. There is only one call out to the discovery api for each endpoint request per run, and is thereafter cached — in that way the above code will only have three http requests instead of four.
 
 ## Concurrent Processing with Apps Scripts API + Requests.gs
 
@@ -166,15 +218,16 @@ function calledFunction (str) {
 }
 
 function entryPoint () {
-  var hi = Import.Requests.callMyFunctionInDevMode('calledFunction', 'hi');
+  var RequestsLib = Import.Requests;
+  var hi = RequestsLib.callMyFunctionInDevMode('calledFunction', 'hi');
   hi;  // 'hi'
 }
 ```
 
-Make multiple calls!
+Make multiple calls. Note that this requires ContextManager.gs library.
 
 ```js
-var response = Import.Requests.concurrentlyInDevMode(function (c) {
+var response = RequestsLib.concurrentlyInDevMode(function (c) {
   c.add('calledFunction', 'hello');
   c.add('calledFunction', 'world');
 });
@@ -182,5 +235,7 @@ var response = Import.Requests.concurrentlyInDevMode(function (c) {
 response;  // ["hello", "world"]
 ```
 
-Note that at the present time concurrent calls have a time limit of about one minute. Also note that the author believes the response is always in the expected order (and never "world, hello"), because Google returns the responses in order of the original requests passed to it.
+When you have written the functions and are ready for production, simply publish as API executable, and change `concurrentlyInDevMode` method to `concurrently`.
+
+Note that at the present time concurrent calls have a time limit of about one minute. Also note that the response is always in the expected order (and never "world, hello"), because Google returns the responses in order of the original requests passed to it.
 

@@ -1,19 +1,27 @@
 # modularLibraries.gs
 
+A Google Apps Script solution for library management. 
+
 This repo consists of:
 
-- Import.gs which is boilerplate code used to write other libraries, and provides the project the `Import` global object
-- Sample libraries and documentation for writing libraries that can be imported via the `Import.NameOfLibrary`
+- Foundational code that enables modular libraries
+  - Import.gs provides the scaffolding needed for library usage and creation
+  - Requests.gs allows you to interact with Google APIs, external APIs
+- Sample libraries which extends Google APIs, by using the foundational code above
+  - Sheets.gs is a light wrapper around the Spreadsheet APIs
+  - SheetsDB.gs extends Sheets.gs by introducing sessions
 
-## Main
+All aspects are well documented, including tutorials.
+
+## Foundations
 
 ### Import.gs
 
-A Google Apps Script solution to writing and using modular libraries so that apps can better manage code reuse. All the below libraries use this as a framework. [[Link](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Import/Import.md)]
+A Google Apps Script solution to writing and using modular libraries so that apps can better manage code reuse. All the below libraries use this as a framework. [[Link](http://example.com)]
 
 ### Requests.gs
 
-A modular library for Google Apps Scripting that makes external requests a cinch by wrapping `UrlFetchApp`. Has support for interacting with Google APIs via the Discovery service, and support for concurrent processing. [[Link](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Requests/Requests.md)]
+A modular library for Google Apps Scripting wrapping `UrlFetchApp`. It also has support for interacting with Google APIs via the Discovery service, and support for concurrent processing. [[Link](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Requests/Requests.md)]
 
 ## Testing and Debugging
 
@@ -25,7 +33,7 @@ Assertion and unit testing of modular libraries. [[Link](http://example.com)]
 
 Make templated strings and log output with apps scripting a cinch. [[Link](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/FormatLogger/FormatLogger.md)]
 
-## Stores.gs
+## Stores
 
 ### CacheStore.gs
 
