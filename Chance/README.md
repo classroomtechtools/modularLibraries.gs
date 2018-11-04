@@ -4,12 +4,12 @@
 
 ## Quickstart
 
-Copy [this library's code]() into your project. Use it:
+Copy [this library's code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Chance/Chance.gs) into your project. Use it:
 
 ```js
 var chance;
 Import.Chance({
-	namespace: 'Chance'
+    namespace: 'Chance'
 });
 Chance.name();  // random name
 ```
@@ -19,14 +19,13 @@ See [chancejs](https://chancejs.com) for full API details. Chance is also great 
 ```js
 // If you need to use the seed feature:
 chance = Import.Chance({
-	namespace: 'Chance'
-	config: {
-		seed: ''  // put your seed here
-	}
+    namespace: 'Chance'
+    config: {
+        seed: ''  // put your seed here
+    }
 });
 Chance.name();
 ```
-
 
 ## Motivation
 
