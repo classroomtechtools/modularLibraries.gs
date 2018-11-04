@@ -18,7 +18,7 @@ See [chancejs](https://chancejs.com) for full API details. Chance is also great 
 
 ```js
 // If you need to use the seed feature:
-chance = Import.Chance({
+Import.Chance({
     namespace: 'Chance'
     config: {
         seed: ''  // put your seed here
