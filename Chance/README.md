@@ -7,7 +7,6 @@
 Copy [this library's code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Chance/Chance.gs) into your project. Use it:
 
 ```js
-var chance;
 Import.Chance({
     namespace: 'Chance'
 });
@@ -29,7 +28,7 @@ Chance.name();
 
 ## Motivation
 
-Making some convenient functions available to the appscript stack is useful for me, for the following:
+Making some convenient functions available to the appscript stack is useful for me, for the following situations:
 
-- Working at a school, I'd like to flip a button and instead of school info being displayed (student names, nationality info) you get randomized ones instead. Useful for conferences
+- Working at a school, I'd like to flip a button on a front end tool, and instead of school info being displayed (student names, nationality info) you get randomized ones instead. Useful for conferences.
 - Potentially could be used in a testing framework
