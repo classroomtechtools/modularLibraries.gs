@@ -12,23 +12,32 @@ function RequestsPackage_ (config) {
     return self().get('https://www.googleapis.com/discovery/v1/apis/' + name + '/' + version + '/rest');
   };
 
-  var discoveryCache = {};
+  // Vastly improve things by storing cache in cachestore if available
+  var discoveryCache = CacheService.getScriptCache();
   discoverUrl = function (name, version, resource, method) {
-    var data;
-    data = discoveryCache[name+version];
-    if (!data)
-      data = discovery(name, version).json();
+    var data, key, ret;
+    key = name+version+resource+method;
+    data = discoveryCache.get(key);
+    if (data) {
+      "from cache: {}".__log__(data);
+      return data;
+    }
+    data = discovery(name, version).json(); // reaches out to HTTP
     if (resource.indexOf('.') == -1) {
       // straight forward, no resource resolution
-      return data.baseUrl + data.resources[resource].methods[method].path;
+      ret = data.baseUrl + data.resources[resource].methods[method].path;
     } else {
       // resources can be dot-noted in order to resolve a path, e.g. sheets.spreadsheets.values, sheets.spreadsheets.developerMetadata
       var resources = data;
       resource.split('.').forEach(function (res) {
         resources = resources.resources[res];
       });
-      return data.baseUrl + resources.methods[method].path;
+      ret = data.baseUrl + resources.methods[method].path;
     }
+    
+    "here {0}".__log__(data);
+    discoveryCache.put(key, ret, 21600);  // max is 6 hours
+    return ret;
   };
 
   config = config || {};
