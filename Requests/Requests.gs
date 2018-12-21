@@ -34,8 +34,7 @@ function RequestsPackage_ (config) {
       });
       ret = data.baseUrl + resources.methods[method].path;
     }
-    
-    "here {0}".__log__(data);
+
     discoveryCache.put(key, ret, 21600);  // max is 6 hours
     return ret;
   };
