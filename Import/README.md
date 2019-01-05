@@ -399,11 +399,14 @@ The first line of the library is compressed for sanity, but if you wish to under
 ```js
 (function (global, name, Package, helpers, creators) {
   name = name.replace(/ /g,"_");
+  
+  // ref function with added helper properties so it's available from within the package
   var ref = function wrapper (args) {
     var wrapped = function () { return Package.apply(Import._import(name), arguments); };
-    for (i in args) { wrapped[i] = args[i]; };
+    for (var i in args) { wrapped[i] = args[i]; };
     return wrapped;
   }(helpers);
+  
   global.Import = global.Import || {};
   Import.register = Import.register || function (uniqueId, func) {
     Import.__Packages = Import.__Packages || {};
@@ -415,7 +418,7 @@ The first line of the library is compressed for sanity, but if you wish to under
     return ret;
   };
   Import[name] = function wrapper (args) {
-    var wrapped = function (options) {    // TODO: replace spaces with underscores (camelcase?)
+    var wrapped = function (options) {
       options = options || {};
       options.namespace = options.namespace || false;
       options.base = options.base || false;
@@ -425,7 +428,12 @@ The first line of the library is compressed for sanity, but if you wish to under
       var makeIt = function () {
         var params, ret;
         params = options.config ? [options.config] : options.params;
-        return ref.apply(null, params);
+        ret = ref.apply(null, params);
+        
+        // add helper properties so it's available on the library instance:
+        for (var h in helpers) 
+          ret[h] = helpers[h];
+        return ret;
       }.bind(this);
       
       var ret;
@@ -447,15 +455,31 @@ The first line of the library is compressed for sanity, but if you wish to under
       }
       return ret;
     }
-    for (var c in creators) { wrapped[c] = creators[c]; }
+    
+    // populate the library reference with creators:
+    for (var c in creators)
+      wrapped[c] = creators[c];
     return wrapped;
   }(creators);
   Import.register(name, ref);
-})(this, Package, Helpers, Creators);
+})(this, 
+   
+"name",
+   
+function Package_(config) {
+  var self = this;
+  return {};
+}, 
+
+{ /* helpers */ },
+
+{ /* creators */ }
+  
+);
 ```
 
 ### Minified Packaging Code
 
 ```js
-(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,Package,Helpers,Creators);
+(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(var i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,Package,Helpers,Creators);
 ```
