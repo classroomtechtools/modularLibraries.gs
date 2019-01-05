@@ -32,7 +32,7 @@ function myFunction () {
 ```
 
 Stackdriver logger shows the this.error object, which is just this:
-{trace=[{file=test, func=myFunction, line=11}, {file=test, func=runFirst, line=3}], file=test, line=11, message=Something went wrong!}
+
 ```js
 { 
   message: "Something went wrong!",
@@ -49,8 +49,6 @@ Stackdriver logger shows the this.error object, which is just this:
    }]
 }
 ```
-
-Make all the 
 
 ## Motivation
 
