@@ -32,18 +32,18 @@ function myFunction () {
 ```
 
 Stackdriver logger shows the this.error object, which is just this:
-
+{trace=[{file=test, func=myFunction, line=11}, {file=test, func=runFirst, line=3}], file=test, line=11, message=Something went wrong!}
 ```js
 { 
   message: "Something went wrong!",
   file: "Code",
-  line: 43,
+  line: 11,
   trace: [{  // stacktrace
-    file: "test",
+    file: "Code",
     func: "myFunction",
     line: 10
   }, {
-    file: "test",
+    file: "Code",
     func: "runFirst",
     line: 2
    }]
