@@ -13,13 +13,14 @@ function Package_(config) {
     this.name = config.name;
     this.message = message;
     var stackInfo = self.utils.getStack(0);
+    stackInfo.__pprint__;
     this.error = stackInfo.error;
     this.error.message = message;
-    this.error.trace = stackInfo.stackLevels.slice(3);  // remove traces of me
+    this.error.trace = stackInfo.stackLevels;  // remove traces of me
     this.stack = stackInfo.stack;
-    this.caller = stackInfo.stackLevels[0].caller;
-    this.lineNumber = stackInfo.stackLevels[0].line;
-    this.file = stackInfo.stackLevels[0].file;
+    this.caller = stackInfo.stackLevels[1].caller;
+    this.lineNumber = stackInfo.stackLevels[1].line;
+    this.file = stackInfo.stackLevels[1].file;
     if (config.callback && typeof config.callback === 'function') config.callback.call(this);
   }
   customError.prototype = Object.create(Error.prototype); 
@@ -36,7 +37,7 @@ function Package_(config) {
       
       // by default this is 1 (meaning identify the line number that called this function) 2 would mean call the function 1 higher etc.
       level = typeof level === 'undefined' ? 1 : Math.abs(level);
-      var ret = {};
+      var ret = {}, indexToRemoveOwnStackLevels = 3;
       
       try {
         // throw a fake error
@@ -45,10 +46,10 @@ function Package_(config) {
       catch (err) {
         // return the error object so we know where we are
         ret.stack = err.stack;
-        var stack = err.stack.split('\n');
+        var stack = err.stack.slice(indexToRemoveOwnStackLevels).split('\n');
         if (!level) {
           // return an array of the entire stack
-          ret.stackLevels = stack.slice(0,stack.length-1).map (function(d) {
+          ret.stackLevels = stack.slice(indexToRemoveOwnStackLevels,stack.length-1).map (function(d) {
             return deComposeMatch(d);
           });
         } else {    
@@ -56,7 +57,7 @@ function Package_(config) {
           ret.stackLevels = [];
           ret.stackLevels.push(deComposeMatch(stack[Math.min(level,stack.length-1)]));
         }
-        ret.error = {file: ret.stackLevels[0].file, lineNumber: ret.stackLevels[0].line};
+        ret.error = {file: ret.stackLevels[0].file, line: ret.stackLevels[0].line};
         return ret;
       }
       
