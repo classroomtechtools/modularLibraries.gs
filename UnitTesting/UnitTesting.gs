@@ -185,8 +185,8 @@ function Package (config) {
     
     var failComment = '';
     if (comment != null) failComment = 'Comment: '+comment; 
-    
-    throw Error(failComment +'  -- Failure: '+ message);
+    message.__print__;
+    throw Error(failComment +'\n\t\t  -- Failure: '+ message + '\n    ');
   }
 
 
