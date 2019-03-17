@@ -1,4 +1,4 @@
-(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
+(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(var i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
 
 "Dotmitizer",
 
@@ -8,7 +8,7 @@ function Package (config) {
   config.defaultValue = config.defaultvalue || null;  // Avoid changing this
 
   var dotize = dotize || {};
-  
+
   /*
     Accepts an array and determines the minimum number of left-size padding required to maintain sort order
   */
@@ -18,7 +18,7 @@ function Package (config) {
     while (pads.length < len) {
       pads += pad;
     }
-  
+
     this.pad = function (what) {
       var s = what.toString();
       return pads.substring(0, pads.length - s.length) + s;
@@ -48,11 +48,11 @@ function Package (config) {
       }
       return everyHeader;
     }, []);
-    
+
     var mappedHeaders, finalHeaders;
     mappedHeaders = headers.map(function (el, i) {
-      return { 
-        index: i, 
+      return {
+        index: i,
         value: el === 'id' ? '' : el.toLowerCase()
       }
     });
@@ -66,7 +66,7 @@ function Package (config) {
     }).filter(function (value, index, me) {
       return me.indexOf(value) === index;
     });
-    
+
     return jsons.reduce(function (acc, obj) {
       var row, value;
       row = [];
@@ -80,10 +80,10 @@ function Package (config) {
     }, [finalHeaders]);
 
   },
-  
+
   dotize.convert = function(obj, prefix) {
     var newObj = {};
-  
+
     if ((!obj || typeof obj != "object") && !Array.isArray(obj)) {
       if (prefix) {
         newObj[prefix] = obj;
@@ -92,18 +92,18 @@ function Package (config) {
         return obj;
       }
     }
-  
+
     function isNumber(f) {
       return !isNaN(parseInt(f));
     }
-  
+
     function isEmptyObj(obj) {
       for (var prop in obj) {
         if (Object.hasOwnProperty.call(obj, prop))
           return false;
       }
     }
-  
+
     function getFieldName(value, field, prefix, isRoot, isItemOfArray, isArray) {
       isArray = isArray || 0;  // should be the length, truthiness makes it work
       //"value: {0.print} field: {1} isRoot: {3} isArrayItem: {4}, isArray: {5}".__log__.apply(null, arguments);
@@ -114,7 +114,7 @@ function Package (config) {
       else
         return (prefix ? prefix + "." : "") + field;
     }
-  
+
     return function recurse(o, p, isRoot) {
       var isArrayItem = Array.isArray(o);
       for (var f in o) {
@@ -139,11 +139,11 @@ function Package (config) {
           }
         }
       }
-      
+
       return newObj;
     }(obj, prefix, true);
   };
-  
+
   dotize.revert = function (source) {
 
     function arrayRecurse(parent, key, value) {
@@ -163,7 +163,7 @@ function Package (config) {
       parent[index] = arrayRecurse(parent[index] || [], subkey, value);
       return parent;
     }
-    
+
     function keyRecurse (parent, key, value) {
       if (key.indexOf('.') === -1) {
         parent[key] = value;
@@ -173,13 +173,13 @@ function Package (config) {
       parent[subkey] = keyRecurse(parent[subkey] || {}, key.slice(key.indexOf('.')+1), value);
       return parent;
     };
-    
+
     var result;
     result = {};  // Has to be a hash
-    Object.keys(source).forEach(function (sourceKey) {  
+    Object.keys(source).forEach(function (sourceKey) {
       var sourceValue = source[sourceKey];
-      
-      if (sourceKey.indexOf('[') === -1) 
+
+      if (sourceKey.indexOf('[') === -1)
         // Simple case
         keyRecurse(result, sourceKey, sourceValue);
       else {
@@ -189,7 +189,7 @@ function Package (config) {
         var step;
         step = function cycle (parent, key, value) {
           var subkey, lastSubkey, restKey, index, nextIndex, nextKey;
-          if (key.indexOf('[') != key.lastIndexOf('[')) {  // what about object array array object?    
+          if (key.indexOf('[') != key.lastIndexOf('[')) {  // what about object array array object?
             subkey = key.slice(0, key.indexOf('['));
             restKey = key.slice(key.indexOf(']')+1);
             index = parseInt(key.slice(key.indexOf('[')+1, key.indexOf(']')));
@@ -209,10 +209,10 @@ function Package (config) {
           parent[subkey] = parent[subkey] || [];
           return arrayRecurse(parent[subkey], restKey, value);
         }(result, sourceKey, sourceValue);
-        keyRecurse(result, sourceKey.slice(0, sourceKey.indexOf('[')), step);      
+        keyRecurse(result, sourceKey.slice(0, sourceKey.indexOf('[')), step);
       }
     });
-    
+
     if ((Object.keys(result).length == 1) && result[""])
       return result[""];
     return result;

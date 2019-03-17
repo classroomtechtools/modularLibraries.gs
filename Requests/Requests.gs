@@ -1,13 +1,13 @@
-(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
+(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(var i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
 
 "Requests",
 
-function RequestsPackage_ (config) {  
+function RequestsPackage_ (config) {
   var self = this, discovery, discoverUrl;
   var scriptApp = function gimmeglobal() {
     return this;
   }.apply(null, [])['Script' + 'App'];
-  
+
   discovery = function (name, version) {
     return self().get('https://www.googleapis.com/discovery/v1/apis/' + name + '/' + version + '/rest');
   };
@@ -47,28 +47,28 @@ function RequestsPackage_ (config) {
   }
   config.body = config.body || {};
   config.headers = config.headers || null;
-  config.query = config.query || {};  
+  config.query = config.query || {};
   config.oauth = config.oauth || false;
   config.basicAuth = config.basicAuth || false;
   config.discovery = config.discovery || null;
   if (config.discovery && config.discovery.name && config.discovery.version && config.discovery.resource && config.discovery.method) {
     config.baseUrl = discoverUrl(config.discovery.name, config.discovery.version, config.discovery.resource, config.discovery.method);
   }
-  
+
   if (config.oauth) {
     config.headers = config.headers || {};
     config.headers['Authorization'] = "Bearer " + (config.oauth === 'me' ? scriptApp.getOAuthToken() : config.oauth);
   }
-  
+
   if (config.basicAuth) {
     config.headers = config.headers || {};
     config.headers['Authorization'] = "Basic " + config.basicAuth;
   }
-  
+
   var Response = function (_resp) {
-  
+
     return {
-    
+
       json: function () {
         try {
           return JSON.parse(this.text());
@@ -78,11 +78,11 @@ function RequestsPackage_ (config) {
           throw Error("Response did not return a parsable json object");
         }
       },
-      
+
       text: function () {
         return _resp.getContentText();
       },
-      
+
       statusCode: function () {
         return _resp.getResponseCode();
       },
@@ -105,7 +105,7 @@ function RequestsPackage_ (config) {
           if (milliseconds > 0) {
             console.log("Sleeping for " + (milliseconds/1000).toString() + " seconds.");
             Utilities.sleep(milliseconds);
-          } 
+          }
           return true;
         }
         return false;
@@ -131,7 +131,7 @@ function RequestsPackage_ (config) {
         var zipResult = fetchResult.zip(rootKey, {initialValue: json[rootKey]});
         return zipResult;
       },
-      
+
       pageByTokens: function (rootKey, next, query) {
         next = next || 'nextPageToken';
         query = query || 'pageToken';
@@ -143,7 +143,7 @@ function RequestsPackage_ (config) {
         token = json[next];
         while (token) {
           req = this.request;
-          req.setQuery(query, token); 
+          req.setQuery(query, token);
           result = req.fetch();
           if (!result.ok) {
             // "If the token is rejected for any reason, it should be discarded, and pagination should be restarted from the first page of results."
@@ -159,12 +159,12 @@ function RequestsPackage_ (config) {
         }
         return collection;
       },
-      
+
       ok: _resp.getResponseCode() == 200
-      
+
     }
   };
-  
+
   var BatchResponses = function (_responses) {
     _responses = _responses || [];
     return {
@@ -182,7 +182,7 @@ function RequestsPackage_ (config) {
         });
         return objectList;
       },
-   
+
       /*
         Used to process batch items that return a list at a particul rootKey
       */
@@ -213,8 +213,8 @@ function RequestsPackage_ (config) {
           }
         });
         return json;
-      },      
-    
+      },
+
       getResponses: function () {
         return _responses;
       }
@@ -261,22 +261,22 @@ function RequestsPackage_ (config) {
           })(resp, expandedRequests));
           return acc;
         }, []);
-        
+
         if (expandForPages && (function (resps) {
           var newResponses;
           if (expandedRequests.length === 0) return;  // no need to continue
           newResponses = expandedRequests.fetchAll(false);
           Array.prototype.push.apply(resps, newResponses.getResponses());
         })(responses));
-        
+
         return new BatchResponses(responses);
       },
-      
+
       add: function (item) {
         item.muteHttpExceptions = true;
         _list.push(item);
       },
-      
+
       length: function (item) {
         return _list.length;
       }
@@ -284,7 +284,7 @@ function RequestsPackage_ (config) {
   };
 
   /**
-   * Represents a request. 
+   * Represents a request.
    *
    * @constructor
    * @param {object} [_options={}] - Options object
@@ -302,30 +302,30 @@ function RequestsPackage_ (config) {
     var toParams;
 
     return {
-    
+
       params: function (includeUrl) {
         if (typeof includeUrl === 'undefined') includeUrl = false;
-        
+
         var params = {};
         params.muteHttpExceptions = true;
         params.method = _options.method.toLowerCase() || 'get';
-  
+
         if (_options.headers || config.headers) {
           params.headers = self.utils.extend(true, config.headers, _options.headers);
         }
-        
+
         if ( ['put', 'post'].indexOf(params.method) !== -1 ) {
           params.payload = self.utils.extend(true, config.body, _options.body);
           params.payload = JSON.stringify(params.payload);
           params.contentType = 'application/json';
         }
-        
+
         if (includeUrl) params.url = this.getUrl();
         return params;
       },
-    
+
       /*
-        Prepares the params parameter of UrlFetchApp.fetch and returns 
+        Prepares the params parameter of UrlFetchApp.fetch and returns
         custom response object
       */
       build: function () {
@@ -369,19 +369,19 @@ function RequestsPackage_ (config) {
             }
             return a;
           }, []
-        ).join('&');        
+        ).join('&');
 
         return ret;
       },
-      
+
       setQuery: function (key, value) {
         _options.query[key] = value;
       },
-      
+
       getQuery: function () {
         return _options.query;
       },
-      
+
       clearQuery: function () {
         _options.query = {};
       },
@@ -394,7 +394,7 @@ function RequestsPackage_ (config) {
   };
 
   var returnedObject = {
-    
+
     /*
       Perform the same method on a pattern-identifying URL
     */
@@ -423,7 +423,7 @@ function RequestsPackage_ (config) {
       }, []);
       return new BatchRequests(requests).fetchAll(options.expandForPages);
     },
-    
+
     get: function (url, options, fetchYN) {
       var req;
       if (typeof fetchYN === 'undefined') fetchYN = true;
@@ -444,7 +444,7 @@ function RequestsPackage_ (config) {
       if (fetchYN) return req.fetch();
       return req;
     },
-    
+
     put: function (url, options, fetchYN) {
       if (typeof fetchYN === 'undefined') fetchYN = true;
       options = options || {};
@@ -454,7 +454,7 @@ function RequestsPackage_ (config) {
       if (fetchYN) return req.fetch();
       return req;
     },
-    
+
     delete_: function (url, options, fetchYN) {
       if (typeof fetchYN === 'undefined') fetchYN = true;
       options = options || {};
@@ -464,7 +464,7 @@ function RequestsPackage_ (config) {
       if (fetchYN) return req.fetch();
       return req;
     },
-    
+
     head: function (url, options, fetchYN) {
       if (typeof fetchYN === 'undefined') fetchYN = true;
       options = options || {};
@@ -474,7 +474,7 @@ function RequestsPackage_ (config) {
       if (fetchYN) return req.fetch();
       return req;
     },
-    
+
     options: function (url, options, fetchYN) {
       if (typeof fetchYN === 'undefined') fetchYN = true;
       options = options || {};
@@ -485,7 +485,7 @@ function RequestsPackage_ (config) {
       return req;
     },
   };
-  
+
   if (config.method) {
     return returnedObject[config.method];
   }
@@ -501,7 +501,7 @@ function RequestsPackage_ (config) {
     }
     return UrlFetchApp.fetchAll(requestsParams);
   },
-  
+
   /*
     http://www.{name}.com, {name: 'hey'} => http://www.hey.com
   */
@@ -512,12 +512,12 @@ function RequestsPackage_ (config) {
       err.name = 'ValueError';
       return err;
     };
-  
+
     //  defaultTo :: a,a? -> a
     var defaultTo = function(x, y) {
       return y == null ? x : y;
     };
-    
+
     var lookup = function(obj, path) {
       if (!/^\d+$/.test(path[0])) {
         path = ['0'].concat(path);
@@ -528,11 +528,11 @@ function RequestsPackage_ (config) {
       }
       return obj;
     };
-  
+
     var args = Array.prototype.slice.call(arguments, 1);
     var idx = 0;
     var state = 'UNDEFINED';
-    
+
     return template.replace(
       /([{}])\1|[{](.*?)(?:!(.+?))?[}]/g,
       function(match, literal, key, xf) {
@@ -555,7 +555,7 @@ function RequestsPackage_ (config) {
           idx += 1;
         }
         var value = defaultTo('', lookup(args, key.split('.')));
-        
+
         if (xf == null) {
           return value;
         } else if (Object.prototype.hasOwnProperty.call(transformers, xf)) {
@@ -566,7 +566,7 @@ function RequestsPackage_ (config) {
       }
     );
   },
-  
+
   utils: {
 
     /*
@@ -574,19 +574,19 @@ function RequestsPackage_ (config) {
     */
     extend: function () {
       var extend = function () {
-  
+
         // Variables
         var extended = {};
         var deep = false;
         var i = 0;
         var length = arguments.length;
-    
+
         // Check if a deep merge
         if ( Object.prototype.toString.call( arguments[0] ) === '[object Boolean]' ) {
             deep = arguments[0];
             i++;
         }
-    
+
         // Merge the object into the extended object
         var merge = function ( obj ) {
             for ( var prop in obj ) {
@@ -600,25 +600,25 @@ function RequestsPackage_ (config) {
                 }
             }
         };
-    
+
         // Loop through each object and conduct a merge
         for ( ; i < length; i++ ) {
             var obj = arguments[i];
             merge(obj);
         }
-    
+
         return extended;
-  
+
       }
       return extend.apply(extend, arguments);
     },
 
-    
+
     /*
     Flatten list into of rows with objects into list, first row being headers
     */
     flatten: function (rows, options) {
-    
+
       /*
         Dotize: https://github.com/vardars/dotize/blob/master/src/dotize.js
         Flatten an object that contains nested objects into an object with just one layer,
@@ -626,7 +626,7 @@ function RequestsPackage_ (config) {
       */
       var dotize = function(obj, prefix) {
         var newObj = {};
-        
+
         if ((!obj || typeof obj != "object") && !Array.isArray(obj)) {
           if (prefix) {
             newObj[prefix] = obj;
@@ -635,18 +635,18 @@ function RequestsPackage_ (config) {
             return obj;
           }
         }
-        
+
         function isNumber(f) {
           return !isNaN(parseInt(f));
         }
-        
+
         function isEmptyObj(obj) {
           for (var prop in obj) {
             if (Object.hasOwnProperty.call(obj, prop))
               return false;
           }
         }
-        
+
         function getFieldName(field, prefix, isRoot, isArrayItem, isArray) {
           if (isArray)
             return (prefix ? prefix : "") + (isNumber(field) ? "[" + field + "]" : (isRoot ? "" : ".") + field);
@@ -655,7 +655,7 @@ function RequestsPackage_ (config) {
           else
             return (prefix ? prefix + "." : "") + field;
         }
-        
+
         return function recurse(o, p, isRoot) {
           var isArrayItem = Array.isArray(o);
           for (var f in o) {
@@ -680,11 +680,11 @@ function RequestsPackage_ (config) {
               }
             }
           }
-          
+
           return newObj;
         }(obj, prefix, true);
       };
-    
+
       options = options || {};
       options.pathDelimiter = options.pathDelimiter || '.';
       var headers;
@@ -698,11 +698,11 @@ function RequestsPackage_ (config) {
         }
         return everyHeader;
       }, []);
-      
+
       var mappedHeaders, finalHeaders;
       mappedHeaders = headers.map(function (el, i) {
-        return { 
-          index: i, 
+        return {
+          index: i,
           value: el === 'id' ? '' : el.toLowerCase()
         }
       });
@@ -716,7 +716,7 @@ function RequestsPackage_ (config) {
       }).filter(function (value, index, me) {
         return me.indexOf(value) === index;
       });
-      
+
       return rows.reduce(function (acc, obj) {
         var row, value;
         row = [];
@@ -728,13 +728,13 @@ function RequestsPackage_ (config) {
         acc.push(row);
         return acc;
       }, [finalHeaders]);
-      
+
     }
-    
+
   },
 },
 
-{ /* creators */ 
+{ /* creators */
 
   /*
     https://developers.google.com/apis-explorer/#search/discovery/discovery/v1/
@@ -770,7 +770,7 @@ function RequestsPackage_ (config) {
       return request;
     }.apply(null, arguments);  // null gives me the global object as 'this'
   },
-  
+
   callMyFunction: function () {
     var request, response, params;
     params = [false].concat(Array.prototype.slice.call(arguments));
@@ -782,7 +782,7 @@ function RequestsPackage_ (config) {
     }
     return response.response.result;
   },
-  
+
   callMyFunctionInDevMode: function () {
     var request, response, params;
     params = [true].concat(Array.prototype.slice.call(arguments));
@@ -794,7 +794,7 @@ function RequestsPackage_ (config) {
     }
     return response.response.result;
   },
-  
+
   concurrentlyInDevMode: function (/* arguments */) {
     // take on true so that it is the fourth argument
     var i, params = Array.prototype.slice.call(arguments);
@@ -804,7 +804,7 @@ function RequestsPackage_ (config) {
     params.push(true);
     return this.concurrently.apply(this, params);
   },
-  
+
   concurrently: function (body, addCallback, initValue, devMode) {
     var self = this;
     if (typeof initValue === 'undefined') initValue = [];

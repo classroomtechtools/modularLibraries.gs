@@ -1,10 +1,10 @@
-(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
+(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(var i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
 
 "SheetsDBBSession",
 
 function SessionPackage_ (options) {
   var self = this;
-  
+
   var SessionObj = function (dbsheet) {
     this.dbsheet = dbsheet;
     this.valuesSortBy = null;
@@ -14,7 +14,7 @@ function SessionPackage_ (options) {
     this.footerRequests = [];
     this._tabsAutoClear = false;
   };
-  
+
   var builderObj_prototype1 = {
     utils: {
       transpose: self.utils.transpose,
@@ -31,7 +31,7 @@ function SessionPackage_ (options) {
               case "string":
                 if (v[0] == '=') {
                   kind = "formulaValue";
-                } else { 
+                } else {
                   // FIXME: What about nanoseconds, ISO 8601 includes this 2015-10-03T01:00:00Z
                   var match = v.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\+(\d{2}):(\d{2})$/);
                   if (match !== null) {
@@ -80,12 +80,12 @@ function SessionPackage_ (options) {
         return this;
       };
     },
-    
+
     addBodyRequest: function (fn) {
       return function () {
         var request, important;
         request = fn.apply(this, arguments);
-        important = ['NewTab', 'SetNumColumns', 'SetNumRows'].indexOf(fn.name);        
+        important = ['NewTab', 'SetNumColumns', 'SetNumRows'].indexOf(fn.name);
         if (important !== -1) {
           this.headerRequests.push([request, important]);
         } else {
@@ -94,7 +94,7 @@ function SessionPackage_ (options) {
         return this;
       }
     },
-    
+
     addPostRequest: function (fn) {
       return function () {
         var request = fn.apply(this, arguments);
@@ -103,7 +103,7 @@ function SessionPackage_ (options) {
       }
     },
   };
-  
+
   var builderObj_prototype2 = {
     commit: builderObj_prototype1.addBodyRequest(
       function () {
@@ -112,15 +112,15 @@ function SessionPackage_ (options) {
         }
       }
     ),
-    
+
     tabsAutoClear: function () {
       this._tabsAutoClear = true;
     },
-    
+
     setValuesSortByIndex: function (sortBy) {
       this.valuesSortBy = sortBy;
     },
-    
+
     toRange: function (title, left, right) {
       if (title.indexOf(' ') !== -1)
         title = "'" + title + "'";
@@ -129,7 +129,7 @@ function SessionPackage_ (options) {
       else
         return title + '!' + left.toString() + ':' + right.toString();
     },
-    
+
     /*
      * columns first because that is same as a1Notation
      */
@@ -150,7 +150,7 @@ function SessionPackage_ (options) {
         };
       }
     ),
-    
+
     updateCellsWithClear: builderObj_prototype1.addBodyRequest(
       function (sheet, rowIndex, colIndex, rowArray) {
         return function () {
@@ -172,7 +172,7 @@ function SessionPackage_ (options) {
         };
       }
     ),
-    
+
     setValues: builderObj_prototype1.addValueRequest(
       function () {
         if (arguments.length == 0) throw Error("Cannot have setValues with zero args");
@@ -188,7 +188,7 @@ function SessionPackage_ (options) {
           else throw Error("setValues must be either 2, 3, or 4 arguments");
           range = this.toRange(title, left, right);
         }
-        
+
         var values;
         values = arguments[arguments.length-1];
         return function () {
@@ -200,7 +200,7 @@ function SessionPackage_ (options) {
         }
       }
     ),
-    
+
     insertRows: builderObj_prototype1.addBodyRequest(
       function (sheet, startRow, endRow) {
         return function () {
@@ -218,12 +218,12 @@ function SessionPackage_ (options) {
         }
       }
     ),
-    
+
     insertRow: function (sheet, startRow) {
       this.insertRows(sheet, startRow, startRow+1);
       return this;
     },
-    
+
     insertColumns: builderObj_prototype1.addBodyRequest(
       function (sheet, startCol, endCol) {
         return function () {
@@ -241,8 +241,8 @@ function SessionPackage_ (options) {
         }
       }
     ),
-    
-    
+
+
     setNumColumns: builderObj_prototype1.addBodyRequest(
       function SetNumColumns (sheet, numCols) {
         return function SetNumColumns () {
@@ -260,11 +260,11 @@ function SessionPackage_ (options) {
         }.bind(this);
       }
     ),
-    
+
     hideGridlinesRequest: builderObj_prototype1.addBodyRequest(
       function (sheet, bool) {
         return function () {
-          return { 
+          return {
             updateSheetProperties: {
               properties: {
                 sheetId: this.dbsheet.getSheet(sheet).properties.sheetId,
@@ -278,7 +278,7 @@ function SessionPackage_ (options) {
         }.bind(this);
       }
     ),
-    
+
     setNumRows: builderObj_prototype1.addBodyRequest(
       function SetNumRows (sheet, numRows) {
         return function SetNumRows () {
@@ -296,7 +296,7 @@ function SessionPackage_ (options) {
         }.bind(this);
       }
     ),
-    
+
     /*
       In addition to a freezeRows request, it can set the keyHeadingRow which is an option
       that allows us to define which row in the header to look at
@@ -320,7 +320,7 @@ function SessionPackage_ (options) {
         }.bind(this);
       }
     ),
-    
+
     freezeColumns: builderObj_prototype1.addBodyRequest(
       function (sheet, numCols) {
         return function () {
@@ -338,7 +338,7 @@ function SessionPackage_ (options) {
         }.bind(this);
       }
     ),
-    
+
     changeTabColor: builderObj_prototype1.addBodyRequest(
       function (sheet, red, green, blue, alpha) {
         if (typeof alpha === 'undefined')
@@ -360,8 +360,8 @@ function SessionPackage_ (options) {
           };
         }.bind(this);
       }
-    ), 
-    
+    ),
+
     newTab: builderObj_prototype1.addBodyRequest(
       function NewTab (title) {
         return function NewTab () {
@@ -374,8 +374,8 @@ function SessionPackage_ (options) {
           };
         }.bind(this);
       }
-    ),    
-    
+    ),
+
     tabTitleRequest: builderObj_prototype1.addBodyRequest(
       function (sheet, title) {
         return function () {
@@ -391,7 +391,7 @@ function SessionPackage_ (options) {
         }.bind(this);
       }
     ),
-    
+
     /*
      * range: a1notation | gridrange
      */
@@ -425,7 +425,7 @@ function SessionPackage_ (options) {
         }.bind(this);
       }
     ),
-    
+
     updateBand: builderObj_prototype1.addBodyRequest(
       function (bandId, range, first, second, third, fourth) {
         return function () {
@@ -445,15 +445,15 @@ function SessionPackage_ (options) {
 
 
   };
-  
+
   SessionObj.prototype = self.utils.assign(builderObj_prototype1, builderObj_prototype2);
-  
+
   return SessionObj;
 },
 
 {
   utils: {  /* Utility functions */
-  
+
     /*
       return object that takes both
     */
@@ -461,12 +461,12 @@ function SessionPackage_ (options) {
       if (target == null) { // TypeError if undefined or null
         throw new TypeError('Cannot convert undefined or null to object');
       }
-      
+
       var to = Object(target);
-      
+
       for (var index = 1; index < arguments.length; index++) {
         var nextSource = arguments[index];
-        
+
         if (nextSource != null) { // Skip over if undefined or null
           for (var nextKey in nextSource) {
             // Avoid bugs when hasOwnProperty is shadowed
@@ -478,7 +478,7 @@ function SessionPackage_ (options) {
       }
       return to;
     },
-  
+
     transpose: function (arr) {
       return Object.keys(arr[0]).map(function(column) {
         return arr.map(function(row) { return row[column]; });
@@ -488,7 +488,7 @@ function SessionPackage_ (options) {
       var ordA = 'A'.charCodeAt(0);
       var ordZ = 'Z'.charCodeAt(0);
       var len = ordZ - ordA + 1;
-        
+
       var s = "";
       while(n >= 0) {
         s = String.fromCharCode(n % len + ordA) + s;

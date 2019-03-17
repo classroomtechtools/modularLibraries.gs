@@ -1,4 +1,4 @@
-(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
+(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(var i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
 
 "UnitTesting",
 
@@ -20,7 +20,7 @@ function Package (config) {
   log = function () {
     var str = arguments[0];
     var obj = arguments[1];
-    
+
     _log.push(str);
   };
 
@@ -125,7 +125,7 @@ function Package (config) {
       result += ' (' + UtgsUnit.trueTypeOf(aVar) + ')';
     }
     return result;
-  }  
+  }
 
   UtgsUnit.validateArguments = function(opt, fields) {
     fields = fields.split(' ');
@@ -147,7 +147,7 @@ function Package (config) {
 
   UtgsUnit.checkNotNull = function(aVar) {
     return aVar !== null;
-  }  
+  }
 
   /**
   * All assertions ultimately go through this method.
@@ -155,7 +155,7 @@ function Package (config) {
   UtgsUnit.assert = function(comment, booleanValue, failureMessage) {
     if (!booleanValue)
       throw new UtgsUnit.Failure(comment, failureMessage);
-  }  
+  }
 
 
   /**
@@ -182,10 +182,10 @@ function Package (config) {
     * The stack trace at the point at which the failure was encountered
     */
     // this.stackTrace = UtgsUnit.Util.getStackTrace();
-    
+
     var failComment = '';
-    if (comment != null) failComment = 'Comment: '+comment; 
-    
+    if (comment != null) failComment = 'Comment: '+comment;
+
     throw Error(failComment +'  -- Failure: '+ message);
   }
 
@@ -202,7 +202,7 @@ function Package (config) {
     */
     this.description = description;
     throw Error('Argument error: '+ description);
-  }  
+  }
 
 
   /**
@@ -236,7 +236,7 @@ function Package (config) {
 
         try {
           var result = body(ret);
-          if (typeof result !== 'undefined') 
+          if (typeof result !== 'undefined')
             ret = result;
         } catch (err) {
           if (options.onError(err, ret) !== null)
@@ -331,7 +331,7 @@ function Package (config) {
   */
   UtgsUnit.Util.getStackTrace = function() {
     var result = '';
-    
+
     if (typeof(arguments.caller) != 'undefined') { // IE, not ECMA
       for (var a = arguments.caller; a != null; a = a.caller) {
         result += '> ' + UtgsUnit.Util.getFunctionName(a.callee) + '\n';
@@ -356,7 +356,7 @@ function Package (config) {
         }
       }
     }
-    
+
     return result;
   }
 
@@ -367,25 +367,25 @@ function Package (config) {
   UtgsUnit.Util.parseErrorStack = function(exception) {
     var stack = [];
     var name;
-    
+
     if (!exception || !exception.stack) {
       return stack;
     }
-    
+
     var stacklist = exception.stack.split('\n');
-    
+
     for (var i = 0; i < stacklist.length - 1; i++) {
       var framedata = stacklist[i];
-      
+
       name = framedata.match(/^(\w*)/)[1];
       if (!name) {
         name = 'anonymous';
       }
-      
+
       stack[stack.length] = name;
     }
     // remove top level anonymous functions to match IE
-    
+
     while (stack.length && stack[stack.length - 1] == 'anonymous') {
       stack.length = stack.length - 1;
     }
@@ -399,20 +399,20 @@ function Package (config) {
   UtgsUnit.Util.trim = function(string) {
     if (string == null)
       return null;
-    
+
     var startingIndex = 0;
     var endingIndex = string.length - 1;
-    
+
     var singleWhitespaceRegex = /\s/;
     while (string.substring(startingIndex, startingIndex + 1).match(singleWhitespaceRegex))
       startingIndex++;
-    
+
     while (string.substring(endingIndex, endingIndex + 1).match(singleWhitespaceRegex))
       endingIndex--;
-    
+
     if (endingIndex < startingIndex)
       return '';
-    
+
     return string.substring(startingIndex, endingIndex + 1);
   }
 
@@ -431,11 +431,11 @@ function Package (config) {
   }
 
   global.assert = {
-        
+
     FailError: UtgsUnit.Failure,
-    
+
     contextManager: UtgsUnit.Util.contextManager,
-      
+
     /**
     * Checks that two values are equal (using ===)
     * @param {String} comment optional, displayed in the case of failure
@@ -448,8 +448,8 @@ function Package (config) {
       UtgsUnit.validateArguments(opt, 'expected actual');
       UtgsUnit.assert(opt.comment, UtgsUnit.checkEquals(opt.expected, opt.actual), 'Expected {0.expected} but was {0.actual}'.__format__(opt));
     },
-    
-    
+
+
     /**
     * Checks that the given boolean value is true.
     * @param {String} comment optional, displayed in the case of failure
@@ -461,11 +461,11 @@ function Package (config) {
         UtgsUnit.validateArguments(opt, 'actual');
         if (typeof(opt.actual) != 'boolean')
             throw new UtgsUnit.AssertionArgumentError('Bad argument to assert(boolean)');
-    
+
         UtgsUnit.assert(opt.comment, opt.actual === true, 'Call to assert(boolean) with false');
     },
-    
-    
+
+
     /**
     * Synonym for true_
     * @see #assert
@@ -473,7 +473,7 @@ function Package (config) {
     true_: function (opt) {
         this.assert(opt);
     },
-    
+
     /**
     * Checks that a boolean value is false.
     * @param {String} comment optional, displayed in the case of failure
@@ -483,13 +483,13 @@ function Package (config) {
     */
     false_: function (opt) {
         UtgsUnit.validateArguments(opt, 'actual');
-    
+
         if (typeof(opt.actual) != 'boolean')
             throw new UtgsUnit.AssertionArgumentError('Bad argument to false_(boolean)');
-    
+
         UtgsUnit.assert(opt.comment, opt.actual === false, 'Call to false_(boolean) with true');
     },
-    
+
     /**
     * Checks that two values are not equal (using !==)
     * @param {String} comment optional, displayed in the case of failure
@@ -502,7 +502,7 @@ function Package (config) {
         UtgsUnit.validateArguments(opt, 'expected actual');
         UtgsUnit.assert(opt.comment, opt.expected !== opt.actual, 'Expected not to be {0.expected}'.__format__(opt));
     },
-    
+
     /**
     * Checks that a value is null
     * @param {opt}
@@ -513,7 +513,7 @@ function Package (config) {
         UtgsUnit.validateArguments(opt, 'actual');
         UtgsUnit.assert(opt.comment, opt.actual === null, 'Expected ' + UtgsUnit.displayStringForValue(null) + ' but was {0.actual}'.__format__(opt));
     },
-    
+
     /**
     * Checks that a value is not null
     * @param {opt} value the value
@@ -524,10 +524,10 @@ function Package (config) {
       UtgsUnit.validateArguments(opt, 'actual');
       UtgsUnit.assert(opt.comment, UtgsUnit.checkNotNull(opt.actual), 'Expected not to be ' + UtgsUnit.displayStringForValue(null));
     },
-    
+
     /**
     * Checks that a value is undefined
-    * @param {opt} 
+    * @param {opt}
     * @throws UtgsUnit.Failure if the value is not undefined
     * @throws UtgsUnitInvalidAssertionArgument if an incorrect number of arguments is passed
     */
@@ -535,7 +535,7 @@ function Package (config) {
         UtgsUnit.validateArguments(opt, 'actual');
         UtgsUnit.assert(opt.comment, opt.actual === UtgsUnit_UNDEFINED_VALUE, 'Expected ' + UtgsUnit.displayStringForValue(UtgsUnit_UNDEFINED_VALUE) + ' but was ' + UtgsUnit.displayStringForValue(opt.actual));
     },
-    
+
     /**
     * Checks that a value is not undefined
     * @param {opt} comment optional, displayed in the case of failure
@@ -546,7 +546,7 @@ function Package (config) {
       UtgsUnit.validateArguments(opt, 'actual');
       UtgsUnit.assert(opt.comment, UtgsUnit.checkNotUndefined(opt.actual), 'Expected not to be ' + UtgsUnit.displayStringForValue(UtgsUnit_UNDEFINED_VALUE));
     },
-    
+
     /**
     * Checks that a value is NaN (Not a Number)
     * @param {opt} comment optional, displayed in the case of failure
@@ -557,7 +557,7 @@ function Package (config) {
       UtgsUnit.validateArguments(opt, 'actual');
       UtgsUnit.assert(opt.comment, isNaN(opt.actual), 'Expected NaN');
     },
-    
+
     /**
     * Checks that a value is not NaN (i.e. is a number)
     * @param {String} comment optional, displayed in the case of failure
@@ -569,7 +569,7 @@ function Package (config) {
         UtgsUnit.validateArguments(opt, 'actual');
         UtgsUnit.assert(opt.comment, !isNaN(opt.actual), 'Expected not NaN');
     },
-    
+
     /**
     * Checks that an object is equal to another using === for primitives and their object counterparts but also desceding
     * into collections and calling objectEquals for each element
@@ -581,12 +581,12 @@ function Package (config) {
         UtgsUnit.validateArguments(opt, 'expected actual');
         if (opt.expected === opt.actual)
             return;
-    
+
         var isEqual = false;
-    
+
         var typeOfVar1 = UtgsUnit.trueTypeOf(opt.expected);
         var typeOfVar2 = UtgsUnit.trueTypeOf(opt.actual);
-    
+
         if (typeOfVar1 == typeOfVar2) {
             var primitiveEqualityPredicate = UtgsUnit.PRIMITIVE_EQUALITY_PREDICATES[typeOfVar1];
             if (primitiveEqualityPredicate) {
@@ -607,10 +607,10 @@ function Package (config) {
         }
         UtgsUnit.assert(opt.comment, isEqual, 'Expected ' + UtgsUnit.displayStringForValue(opt.expected) + ' but was ' + UtgsUnit.displayStringForValue(opt.actual));
     },
-    
+
     /**
     * Checks that an array is equal to another by checking that both are arrays and then comparing their elements using objectEquals
-    * @param {Object} 
+    * @param {Object}
     *        {Object.expected} value the expected array
     *        {Object.actual} value the actual array
     * @throws UtgsUnit.Failure if the actual value does not equal the expected value
@@ -623,7 +623,7 @@ function Package (config) {
         }
         this.objectEquals(opt);
     },
-    
+
     /**
     * Checks that a value evaluates to true in the sense that value == true
     * @param {String} comment optional, displayed in the case of failure
@@ -636,7 +636,7 @@ function Package (config) {
         if (!opt.actual)
             this.fail(opt.comment);
     },
-    
+
     /**
     * Checks that a value evaluates to false in the sense that value == false
     * @param {String} comment optional, displayed in the case of failure
@@ -649,7 +649,7 @@ function Package (config) {
         if (opt.actual)
             this.fail(opt.comment);
     },
-    
+
     /**
     * Checks that a hash is has the same contents as another by iterating over the expected hash and checking that each
     * key's value is present in the actual hash and calling equals on the two values, and then checking that there is
@@ -674,7 +674,7 @@ function Package (config) {
         this.notUndefined({comment:"Actual hash had key " + key + " that was not expected", actual:opt.expected[key]});
       }
     },
-    
+
     /**
     * Checks that two value are within a tolerance of one another
     * @param {String} comment optional, displayed in the case of failure
@@ -689,12 +689,12 @@ function Package (config) {
       this.true_({comment: "Expected " + opt.expected + ", but got " + opt.actual + " which was more than " + opt.tolerance + " away",
                        actual:Math.abs(opt.expected - opt.actual) < opt.tolerance});
     },
-    
+
     /**
     * Checks that a collection contains a value by checking that collection.indexOf(value) is not -1
-    * @param {Object} 
+    * @param {Object}
     * @param {Object.collection}
-    * @param {Object.value} 
+    * @param {Object.value}
     * @throws UtgsUnit.Failure if the collection does not contain the value
     * @throws UtgsUnitInvalidAssertionArgument if an incorrect number of arguments are passed
     */
@@ -703,7 +703,7 @@ function Package (config) {
       this.true_({comment: "Expected '{0.collection}' to contain '{0.value}'".__format__(opt),
                        actual: opt.collection.indexOf(opt.value) != -1});
     },
-    
+
     /**
     * Checks that two arrays have the same contents, ignoring the order of the contents
     * @param {Object}
@@ -714,20 +714,20 @@ function Package (config) {
     */
     arrayEqualsIgnoringOrder: function(opt) {
         UtgsUnit.validateArguments(opt, 'expected actual');
-    
+
         var notEqualsMessage = "Expected arrays {0.expected} and {0.actual} to be equal (ignoring order)".__format__(opt);
         var notArraysMessage = "Expected arguments {0.expected} and {0.actual} to be arrays".__format__(opt);
-    
+
         UtgsUnit.assert(opt.comment, UtgsUnit.checkNotNull(opt.expected), notEqualsMessage);
         UtgsUnit.assert(opt.comment, UtgsUnit.checkNotNull(opt.actual), notEqualsMessage);
-    
+
         UtgsUnit.assert(opt.comment, UtgsUnit.checkNotUndefined(opt.expected.length), notArraysMessage);
         UtgsUnit.assert(opt.comment, UtgsUnit.checkNotUndefined(opt.expected.join), notArraysMessage);
         UtgsUnit.assert(opt.comment, UtgsUnit.checkNotUndefined(opt.actual.length), notArraysMessage);
         UtgsUnit.assert(opt.comment, UtgsUnit.checkNotUndefined(opt.actual.join), notArraysMessage);
-    
+
         UtgsUnit.assert(opt.comment, UtgsUnit.checkEquals(opt.expected.length, opt.actual.length), notEqualsMessage);
-    
+
         for (var i = 0; i < opt.expected.length; i++) {
             var found = false;
             for (var j = 0; j < opt.actual.length; j++) {
@@ -742,27 +742,27 @@ function Package (config) {
             UtgsUnit.assert(opt.comment, found, notEqualsMessage);
         }
     },
-    
+
     throws: function (opt, func) {
-      UtgsUnit.validateArguments(opt, 'expectedError'); 
+      UtgsUnit.validateArguments(opt, 'expectedError');
       if (typeof(func) !== 'function') throw UtgsUnit.Failure("Must have function");
       var caughtError = false;
-      
+
       try {
         func.call();
       } catch (err) {
         caughtError = true;
         UtgsUnit.assert(opt.comment, err instanceof opt.expectedError, "Expected thrown error to be of type " + (opt.expectedError.name || opt.expectedError.toString()));
       }
-    
+
       if (!caughtError)
         throw UtgsUnit.Failure("No error was thrown, expecting error of type '" + opt.expectedError.name);
     },
-   
+
     doesNotThrow: function (opt, func) {
       UtgsUnit.validateArguments(opt, 'unexpectedError');
       if (typeof(func) !== 'function') throw UtgsUnit.Failure("Must have function");
-      
+
       try {
         func.call();
       } catch (err) {
@@ -773,7 +773,7 @@ function Package (config) {
     throwsError: function (comment, func) {
       var saved, ret;
       saved = assert.result;
-      
+
       if (arguments.length == 1) {
         func = comment;
         comment = '';
@@ -784,7 +784,7 @@ function Package (config) {
       }
       return ret;
     },
-    
+
     doesNotThrowError: function (comment, func) {
       if (arguments.length == 1) {
         func = comment;
@@ -800,7 +800,7 @@ function Package (config) {
       }
       return this.throws.call(this, {expectedError: TypeError}, func);
     },
-        
+
     throwsRangeError: function (comment, func) {
       if (arguments.length == 1) {
         func = comment;
@@ -809,7 +809,7 @@ function Package (config) {
       return this.throws.call(this, {expectedError: RangeError,
                                            comment:comment}, func);
     },
-    
+
     throwsReferenceError: function (comment, func) {
       if (arguments.length == 1) {
         func = comment;
@@ -818,7 +818,7 @@ function Package (config) {
       return this.throws.call(this, {comment: comment,
                                            expectedError: ReferenceError}, func);
     },
-    
+
     describe: function (description, body) {
       UtgsUnit.Util.contextManager(body, {
         enter: function () {
@@ -831,21 +831,21 @@ function Package (config) {
         }
       });
     },
-    
+
     withContext: function (body, options) {
       UtgsUnit.Util.contextManager(body, options);
     },
-    
+
     it: function (shouldMessage, body) {
       UtgsUnit.Util.contextManager(body, {
-        enter: function (obj) { 
+        enter: function (obj) {
           obj.result = "\t✔ " + shouldMessage;
           return obj;
         },
-        onError: function (err, obj) { 
+        onError: function (err, obj) {
           obj.result = '\t✘ ' + shouldMessage + '\n\t\t' + err + (err.stack ? err.stack : err.toString());
           Import.UnitTesting.result = false;  // this should be wrong
-          return null; 
+          return null;
         },
         exit: function (obj) {
           log(obj.result);
@@ -853,11 +853,11 @@ function Package (config) {
         params: [ {} ]
       });
     },
-    
+
     skip: function (shouldMessage, body) {
       log("\t☛ " + shouldMessage + '... SKIPPED');
     },
-    
+
     /**
     * Causes a failure
     * @param failureMessage the message for the failure
@@ -866,7 +866,7 @@ function Package (config) {
         throw new UtgsUnit.Failure("Call to fail()", failureMessage);
     },
    }
-   
+
    global.describe = assert.describe;
    global.it = assert.it;
 
@@ -874,37 +874,37 @@ function Package (config) {
 
 {
 },
-  
+
 {
   /* installs __format__ and prepares the library
      __format__ is the same as found in FormatLogger but do not want to have such a strong dependency
      Guaranteed only to run once per execution
   */
   init: function () {
-  
+
     var global = function () { return this; }.apply(null, []);
     if (global.describe && global.it) return;
-    
+
     //  ValueError :: String -> Error
     var ValueError = function(message) {
       var err = new Error(message);
       err.name = 'ValueError';
       return err;
     };
-    
+
     //  defaultTo :: a,a? -> a
     var defaultTo = function(x, y) {
       return y == null ? x : y;
     };
-    
+
      //  create :: Object -> String,*... -> String
     var create = function() {
-      
+
       return function(template) {
         var args = Array.prototype.slice.call(arguments, 1);
         var idx = 0;
         var state = 'UNDEFINED';
-  
+
         return template.replace(
           /([{}])\1|[{](.*?)(?:!(.+?))?[}]/g,
           function(match, literal, key, xf) {
@@ -938,7 +938,7 @@ function Package (config) {
         );
       };
     };
-  
+
     var lookup = function(obj, path) {
       if (!/^\d+$/.test(path[0])) {
         path = ['0'].concat(path);
@@ -947,12 +947,12 @@ function Package (config) {
         var key = path[idx];
         if (typeof obj[key] === 'function')
           obj = obj[key]();
-        else 
+        else
           obj = obj[key];
       }
       return obj;
     };
-    
+
     if (typeof String.prototype.__format__ === 'undefined') {
       Object.defineProperty(String.prototype, '__format__', {
         get: function () {
@@ -973,5 +973,5 @@ function Package (config) {
   },
   result: true,
 }
-  
+
 );

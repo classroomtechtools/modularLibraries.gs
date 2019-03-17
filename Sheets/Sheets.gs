@@ -1,4 +1,4 @@
-(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
+(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(var i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
 
 "Sheets",
 
@@ -12,17 +12,17 @@ function SheetsPackage_ (config) {
   config.includeValuesInResponse = config.includeValuesInResponse || false;
   config.includeValueInResponse = config.includeValuesInResponse;
   config.defaultTitle = config.defaultTitle || "Untitled Spreadsheet";
-  
+
   var self = this;
   var apiObject, getendpoints, methods;
   var Requests = Import.Requests;
   apiObject = {api: {spreadsheets: {values: {}, sheets: {/* TBI */}, developerMetadata: {}}},
                getValues: {}, metadata: {}};
-     
+
   apiObject.utils = self.utils;
-  
-  // 
-  // Spreadsheets 
+
+  //
+  // Spreadsheets
   //
   apiObject.api.spreadsheets.create = self.utils.standardQueryDecorator(
     function Me (spreadsheet) {
@@ -38,7 +38,7 @@ function SheetsPackage_ (config) {
       })();
     }
   );
-  
+
   apiObject.api.spreadsheets.get = self.utils.standardQueryDecorator(
     function Me () {
       return Requests({
@@ -51,14 +51,14 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId});
     }
   );
-  
+
   apiObject.api.spreadsheets.batchUpdate = self.utils.standardQueryDecorator(
     function Me (requests, opt) {
       opt = opt || {};
       opt.includeSpreadsheetInResponse = opt.includeSpreadsheetInResponse || false;
       opt.responseIncludeGridData = opt.responseIncludeGridData || false;
       opt.responseRanges = opt.responseRanges || [];
-  
+
       return Requests({
         config: {
           discovery: self.discoverSpreadsheet('batchUpdate'),
@@ -75,7 +75,7 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId});
     }
   );
-    
+
   apiObject.api.spreadsheets.getByDataFilter = self.utils.standardQueryDecorator(
     function Me (dataFilters) {
       return Requests({
@@ -92,7 +92,7 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId});
     }
   );
-    
+
   apiObject.api.spreadsheets.developerMetadata.get = self.utils.standardQueryDecorator(
     function Me (id) {
       var response;
@@ -122,12 +122,12 @@ function SheetsPackage_ (config) {
           },
           query: Me.options
         }
-      })({spreadsheetId: config.spreadsheetId});   
+      })({spreadsheetId: config.spreadsheetId});
       if (response.statusCode() == 400) return null;
       return response;
     }
   );
-  
+
   apiObject.api.spreadsheets.values.append = self.utils.standardQueryDecorator(
     function Me (table, values) {
       return Requests({
@@ -151,7 +151,7 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId, range: table});
     }
   );
-  
+
   apiObject.api.spreadsheets.values.batchClear = self.utils.standardQueryDecorator(
     function Me (/* clear ranges */) {
       return Requests({
@@ -167,7 +167,7 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId});
     }
   );
-  
+
   apiObject.api.spreadsheets.values.batchClearByDataFilter = self.utils.standardQueryDecorator(
     function Me (/* dataFilters */) {
       return Requests({
@@ -183,7 +183,7 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId});
     }
   );
-  
+
   /*
     data is a hash where keys are the range a1notation and values are arrays of intended raw values
   */
@@ -217,7 +217,7 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId});
     }
   );
-  
+
   apiObject.api.spreadsheets.values.batchUpdateByDataFilter = self.utils.standardQueryDecorator(
     function Me (dataFilters) {
       return Requests({
@@ -264,7 +264,7 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId, range: range});
     }
   );
-  
+
   apiObject.api.spreadsheets.values.get = self.utils.standardQueryDecorator(
     function Me (range) {
       return Requests({
@@ -280,7 +280,7 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId, range: range});
     }
   );
-  
+
   apiObject.api.spreadsheets.values.batchGet = self.utils.standardQueryDecorator(
     function Me (/* ranges */) {
       return Requests({
@@ -298,7 +298,7 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId});
     }
   );
-  
+
   apiObject.api.spreadsheets.values.batchGetByDataFilter = self.utils.standardQueryDecorator(
     function Me (/* dataFilters */) {
       return Requests({
@@ -317,9 +317,9 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId});
     }
   );
-  
+
   /*
-    
+
   */
   apiObject.api.spreadsheets.values.update = self.utils.standardQueryDecorator(
     function Me (rangeA1Notation, values) {
@@ -364,9 +364,9 @@ function SheetsPackage_ (config) {
       })({spreadsheetId: config.spreadsheetId});
     }
   );
-  
+
   return apiObject;
-}, 
+},
 
 { // private methods
   disc: function (resource, method) {
@@ -386,7 +386,7 @@ function SheetsPackage_ (config) {
   discoverValues: function (method) {
     return this.disc('spreadsheets.values', method)
   },
-  
+
   augmentQueryParams: function (primaryOptions, secondaryOptions) {
     var ret = {};
     Object.keys(secondaryOptions).forEach(function (prop) {
@@ -397,11 +397,11 @@ function SheetsPackage_ (config) {
     });
     return ret;
   },
-  
-  
+
+
   // public methods; added to instance
   utils: {
-  
+
     /*
       See here for explanation: https://gist.github.com/brainysmurf/818dac872a5a79f89c2bba8595f125d7
     */
@@ -424,7 +424,7 @@ function SheetsPackage_ (config) {
       };
       return func;
     },
-  
+
     listValues2array: function (listValues) {
       return listValues.reduce(
         function (acc, valueObj) {
@@ -480,13 +480,13 @@ function SheetsPackage_ (config) {
         }
     });
   },
-  
+
   new_: function () {
     var ss = this().api.spreadsheets.create();
     return this.fromId(ss.json().spreadsheetId);
   },
-  
-  
+
+
 }
 
 );

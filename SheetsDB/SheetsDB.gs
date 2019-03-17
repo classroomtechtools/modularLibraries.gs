@@ -1,4 +1,4 @@
-(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
+(function(global,name,Package,helpers,creators){name = name.replace(/ /g,"_");var ref=function wrapper(args){var wrapped=function(){return Package.apply(Import._import(name),arguments)};for(var i in args){wrapped[i]=args[i]};return wrapped}(helpers);global.Import=global.Import||{};Import.register=Import.register||function(uniqueId,func){Import.__Packages=Import.__Packages||{};Import.__Packages[uniqueId]=func};Import._import=Import._import||function(uniqueId){var ret=Import.__Packages[uniqueId];if(typeof ret==='undefined')throw Error("Import error! No library called "+uniqueId);return ret};global.Import[name]=function wrapper(args){var wrapped=function(options){options=options||{};options.namespace=options.namespace||!1;options.base=options.base||!1;options.config=options.config||{};options.params=options.params||[];var makeIt=function(){var params,ret;params=options.config?[options.config]:options.params;return ref.apply(null,params)}.bind(this);var ret;if(options.namespace){var p=global,g=global,last;options.namespace.split('.').forEach(function(ns){g[ns]=g[ns]||{};p=g;g=g[ns];last=ns});ret=p[last]=makeIt()}else if(options.base){if(options.base==='global'){options.base=global};options.attr=options.attr||name;ret=options.base[options.attr]=makeIt()}else{ret=makeIt()};return ret};for(var c in creators){wrapped[c]=creators[c]};return wrapped}(creators);Import.register(name,ref)})(this,
 
 "SheetsDB",
 
@@ -11,9 +11,9 @@ function Package (config) {
   config.destInfo = config.destInfo || [];   // for the form!
   config.spreadsheetResource = config.spreadsheetResource || null;
   if (!config.spreadsheetResource) throw Error("Requires a spreadsheet resource");
-  
+
   var self = this;
-  
+
   /*
     The private, main constructor
   */
@@ -57,13 +57,13 @@ function Package (config) {
       url = 'https://docs.google.com/spreadsheets/d/' + this.ss.spreadsheetId + '/gviz/tq';
       return this.requests.get(url, {
         query: {tq: "select A, B"},
-      });     
+      });
     },
-  
+
     setDimensionAsColumns: function () {
       config.dimension = 'COLUMNS';
     },
-    
+
     setDimensionAsRows: function () {
       config.dimension = 'ROWS'
     },
@@ -81,14 +81,14 @@ function Package (config) {
         this.updated();
       };
     },
-      
+
     getId: function () {
       return this.ss.spreadsheetId;
     },
-    
+
     api: {
-    
-      /* 
+
+      /*
        * Returns the resource, for obj.ranges is specified then that means we are
        * attempting to retrieve values
        */
@@ -111,7 +111,7 @@ function Package (config) {
          */
         //this.ss = Sheets.Spreadsheets.get(spreadsheetId);
       },
-      
+
       /*
         This is a less efficient way of setting values, but supported
       */
@@ -126,12 +126,12 @@ function Package (config) {
         },
       }
     },
-    
-    processBuilder: function (obj) {    
+
+    processBuilder: function (obj) {
       var resolvedRequests;
       if (obj.headerRequests.length > 0) {
         var priorities;
-        priorities  = obj.headerRequests.map(function (m) { 
+        priorities  = obj.headerRequests.map(function (m) {
           return m[1];
         }).sort()
           .filter(function (value, index, self) {
@@ -139,7 +139,7 @@ function Package (config) {
           }
         );
         priorities.forEach(function (priority) {
-          var requests; 
+          var requests;
           requests = obj.headerRequests.reduce(function (acc, req) {
             var func, requestObj;
             if (req[1] === priority) {
@@ -157,7 +157,7 @@ function Package (config) {
         }.bind(this));
         obj.headerRequests = [];
       }
-      
+
       if (obj.bodyRequests.length > 0) {
         resolvedRequests = obj.bodyRequests.reduce(function (acc, item) {
           var requestObj;
@@ -170,9 +170,9 @@ function Package (config) {
           this.api.batchUpdate({requests:resolvedRequests}, this.getId());
         }
       }
-      
+
       if (obj.valueRequests.length > 0) {
-      
+
         // Check for which tabs to clear by looking through requests and inspecting the range property
         // Thus, only clears tabs that are manipulated in some way, not all tabs
         if (obj._tabsAutoClear) {
@@ -186,7 +186,7 @@ function Package (config) {
             this.clearTab(sheetName);  // add the request to the top
           }.bind(this));
         }
-        
+
         // resolve the requests
         resolvedRequests = obj.valueRequests.reduce(function (acc, item) {
           acc.push(item.call(this));
@@ -196,7 +196,7 @@ function Package (config) {
           valueInputOption: config.valueInputOption,
           data: resolvedRequests
         }, this.getId());
-        
+
       }
       if (obj.footerRequests.length > 0) {
         resolvedRequests = obj.footerRequests.reduce(function (acc, item) {
@@ -206,19 +206,19 @@ function Package (config) {
         this.api.batchUpdate({requests:resolvedRequests}, this.getId());  // TODO: What about "empty response" error
       }
     },
-    
+
     makeRequestBuilder: function () {
       return new Session(this);
-    }, 
-    
+    },
+
   };
-  
+
   var dbSheetPrototype2 = {
-  
+
     valuesBatchUpdate: dbSheetPrototype.ssUpdaterWrapper(function (request) {
       return this.api.values.batchUpdate(request, this.getId());
     }),
-    
+
     getValues: function (range, valueRenderOption) {
       valueRenderOption = valueRenderOption || config.valueRenderOption
       var response = Sheets.Spreadsheets.Values.get(this.getId(), range, {
@@ -227,19 +227,19 @@ function Package (config) {
       });
       return response.values || [[]];
     },
-    
+
     getFormattedValues: function (range) {
       this.getValues(range, 'FORMATTED_VALUE');
     },
-    
+
     getUnformattedValues: function (range) {
       this.getValues(range, 'UNFORMATTED_VALUE');
     },
-    
+
     getFormulaValues: function (range) {
       this.getValues(range, 'FORMULA');
     },
-    
+
     getGridValues: function (a1Notation, mode) {
       mode = mode || 'userEnteredValue';
       // https://issuetracker.google.com/71334456
@@ -274,11 +274,11 @@ function Package (config) {
     getUserEnteredValues: function (a1Notation) {
       return this.getGridValues(a1Notation, 'userEnteredValue');
     },
-    
+
     clearRange: function (range) {
       Sheets.Spreadsheets.Values.clear({}, this.getId(), range);
     },
-    
+
     clearTab: function (tabTitle) {
       var targetTab;
       targetTab = this.getSheets().filter(function (sheet) {
@@ -319,7 +319,7 @@ function Package (config) {
       if (co2)
         endColumnIndex = self.utils.str_to10(co2[1], 1);
       else
-        if (data[3]) 
+        if (data[3])
           endColumnIndex = self.utils.str_to10(data[3], 1);
         else
           endColumnIndex = null;
@@ -334,13 +334,13 @@ function Package (config) {
       if (gridRange.endRowIndex == null) delete gridRange.endRowIndex;
       return gridRange;
     },
-    
-    /* 
+
+    /*
       @param  {Number,String}  sheet    if number, returns the sheet at index
                                         if name, return the sheet that has that name
       @throws {Error}                   if sheet is not a number or not a string
       @return {Object}                  returns the target sheet object
-      
+
       @TODO: Use network call to update
     */
     getSheet: function (sheet) {
@@ -369,7 +369,7 @@ function Package (config) {
       return this.ss.sheets;
     },
 
-    /* 
+    /*
       toRange: Convenience function to convert variables into a A1Notation string
       @return {String}     Legal A1Notation
     */
@@ -381,9 +381,9 @@ function Package (config) {
       else
         return title + '!' + left.toString() + ':' + right.toString();
     },
-    
+
     /*
-     * Returns an object useful 
+     * Returns an object useful
      */
     getActiveInfo: function () {
       var ss, sheet, range, col, row;
@@ -392,7 +392,7 @@ function Package (config) {
       range = SpreadsheetApp.getActiveRange();
       col = range.getA1Notation().match(/[A-Z]+/)[0];
       row = range.getA1Notation().match(/[0-9]+/)[0];
-      
+
       return {
         iAmActive: ss.getId() == this.getId(),
         sheet: sheet,
@@ -413,9 +413,9 @@ function Package (config) {
       if (!sht) // may be either undefined or null
         return [[]];
       numHeaders = sht.properties.gridProperties.frozenRowCount || 1;
-      if (numHeaders == 0) 
+      if (numHeaders == 0)
         return [[]];
-      
+
       // Fill in the remaining in case of empty spaces
       values = this.getValues(this.toRange(sht.properties.title, 1, numHeaders));
       if (values.length < numHeaders) {
@@ -428,17 +428,17 @@ function Package (config) {
           emptyRow.push("");
         }
         for (var j = 0; j < (numHeaders - values.length); i++) {
-          values.push(emptyRow);          
+          values.push(emptyRow);
         }
       }
       return values;
     },
-    
+
     getRange: function ( ) {
       var ss = SpreadsheetApp.openById(this.getId());
       return ss.getRange.apply(ss, arguments);
     },
-    
+
     argsToGrid: function () {
       if (arguments.length == 1 && typeof arguments[0] == 'string')
         return this.a1notation2gridrange(arguments[0]);
@@ -447,7 +447,7 @@ function Package (config) {
       else
         throw Error("Unknown args sent to argsToGrid");
     },
-    
+
     gridToA1Notation: function (grid) {
       var sheetDef, left, right;
       if (Object.keys(grid).length == 1 && typeof grid.sheetId != undefined)
@@ -464,7 +464,7 @@ function Package (config) {
       right = self.utils.zeroIndexedToColumnName(grid.endColumnIndex-1) + (grid.endRowIndex ? grid.endRowIndex : "");  // one off potential here...
       return sheetDef + '!' + left + (right == "" || left == right ? "" : ":" + right);
     },
-    
+
     expandGridToDataTable: function (grid) {
       // FIXME: This doesn't do the same as getDataRange
       var sheet;
@@ -476,7 +476,7 @@ function Package (config) {
       grid.endRowIndex = sheet.properties.gridProperties.rowCount + 1;
       return grid;
     },
-    
+
     toObject: function () {
       var grid, a1notation, headers, obj, objGrid, heading;
       grid = this.argsToGrid.apply(this, arguments);
@@ -498,14 +498,14 @@ function Package (config) {
         }
         obj.columns[heading] = self.utils.zeroIndexedToColumnName(h) + (grid.startRowIndex+1).toString();
       }
-     
+
       return obj;
     },
-    
+
     /*
       Uses the sheet's headers and range values and converts them into the properties
-      
-      @param {string} rangeA1Notation    The range string 
+
+      @param {string} rangeA1Notation    The range string
       @param {object} sheet, left, right
       @returns {List[Object]}
     */
@@ -514,12 +514,12 @@ function Package (config) {
       grid = this.argsToGrid.apply(this, arguments);
       grid = this.expandGridToDataTable(grid);
       a1notation = this.gridToA1Notation(grid);
-      
+
       headers = this.getHeaders(grid.sheetId);
       numHeaders = headers.length;
       headings = headers[config.keyHeaderRow];  // headings to use as keys
       values = this.getUserEnteredValues(a1notation);
-      
+
       // Ensure to adjust the offset to enture it is after headers
       if (grid.startRowIndex == undefined || grid.startRowIndex < headers.length) {
         rowOffset = numHeaders;
@@ -530,7 +530,7 @@ function Package (config) {
       columnOffset = grid.startColumnIndex || 0;
       headers = self.utils.transpose(headers);  // transpose so we can refehence by column below
       var ro, co, header, heading, obj, objGrid, ret = [];
-      
+
       // Loop through the values
       // We need to use headings.length in nested loop to ensure that
       // even columns at the end that are blank come through
@@ -567,15 +567,15 @@ function Package (config) {
     setKeyHeadingRow: function (value) {
       config.keyHeaderRow = value - 1;  // a1notation is 1-index, might as well keep that part consistent
     },
-     
+
     registerPlugin: function (description, func) {
       this.plugins.push({description: description, func: func});
     },
-    
+
     clearPlugins: function () {
       this.plugins = [];
     },
-  
+
     /* FIXME: This is WRONG and confusing */
     insertRow: function (range, row) {
       return Sheets.Spreadsheets.Values.append({
@@ -586,7 +586,7 @@ function Package (config) {
         insertDataOption: "INSERT_ROWS",
       });
     },
-      
+
     getPluginsOverwriteBuildRequests: function (rangeA1Notation) {
       var objs, grid, ret = [];
       objs = this.toObjects(rangeA1Notation);  // convert to A1
@@ -601,7 +601,7 @@ function Package (config) {
           for (prop in obj) {
             if (prop == 'columns')
               continue;
-            
+
             objValue = obj[prop];
             targetHeader = objValue.headers[plugin.description.entryPoint.header - 1];
             if (typeof targetHeader == 'undefined') {
@@ -632,15 +632,15 @@ function Package (config) {
         }, []);
         ret.push(res);
       }
-      
+
       return ret.reduce(function (acc, row) {
         var objs;
         objs = row.filter(function (obj) { /* filter out those not within the range of a1notation */
           if (grid.endColumnIndex === undefined && grid.endRowIndex === undefined)
             return grid.startColumnIndex == grid.startColumnIndex && grid.startColumnIndex == grid.startRowIndex;
           else
-            return ((grid.startColumnIndex === undefined) || (obj.grid.startColumnIndex >= grid.startColumnIndex)) && 
-                   ((grid.endColumnIndex === undefined) || (obj.grid.endColumnIndex <= grid.endColumnIndex)) && 
+            return ((grid.startColumnIndex === undefined) || (obj.grid.startColumnIndex >= grid.startColumnIndex)) &&
+                   ((grid.endColumnIndex === undefined) || (obj.grid.endColumnIndex <= grid.endColumnIndex)) &&
                    ((grid.startRowIndex === undefined) || (obj.grid.startRowIndex >= grid.startRowIndex)) &&
                    ((grid.endRowIndex === undefined) || (obj.grid.endRowIndex <= grid.endRowIndex));
         });
@@ -683,11 +683,11 @@ function Package (config) {
     getUnformattedValues: function (range) {
       return this.getValues(range, 'UNFORMATTED_VALUE');
     },
- 
+
     getFormulaValues: function (range) {
       return this.getValues(range, 'FORMULA_VALUE');
     },
-      
+
     getColumnValues: function (range, column) {
       saved = config.dimension;
       this.setDimensionAsColumns();
@@ -695,18 +695,18 @@ function Package (config) {
       config.dimension = saved;
       return values[column].slice();
     },
-      
+
     addSheets: function (sheets) {
       //Logger.log(_ss.sheets);
     },
-      
+
     getDestinationInfo: function () {
       return config.destInfo;
     },
-      
+
     setDestinationForForm: function (formCreationFunc) {
       var before = [];
-        
+
       var ctx = self.contextManager({
         enter: function (form) {
           this.getSheets().forEach(function (b) {
@@ -735,10 +735,10 @@ function Package (config) {
         }
       });
       ctx.call(this, formCreationFunc);
-        
+
       return config.destInfo;
     },
-    
+
     withSession: dbSheetPrototype.ssUpdaterWrapper(Import.ContextManager().call(this, {
       enter: function (obj) {
         obj.bodyRequests = [];
@@ -756,22 +756,22 @@ function Package (config) {
       },
       params: function () { return [this.makeRequestBuilder()]; },  // new Session(this)
     })),
-    
+
   };  // DbSheet()
 
   DbSheet.prototype = self.utils.assign(dbSheetPrototype, dbSheetPrototype2);
-  
+
   /*
      customBuilder allows end user devs define a function that has 'this'
      as the builder object
   */
-  self.extend.customBuilder = function (definition) {    
+  self.extend.customBuilder = function (definition) {
     var namespace;
     for (namespace in definition) {
       Session.prototype[namespace] = definition[namespace];
     }
   };
-  
+
   return new DbSheet(config.spreadsheetResource);
 
 },
@@ -800,12 +800,12 @@ function Package (config) {
       if (target == null) { // TypeError if undefined or null
         throw new TypeError('Cannot convert undefined or null to object');
       }
-      
+
       var to = Object(target);
-      
+
       for (var index = 1; index < arguments.length; index++) {
         var nextSource = arguments[index];
-        
+
         if (nextSource != null) { // Skip over if undefined or null
           for (var nextKey in nextSource) {
             // Avoid bugs when hasOwnProperty is shadowed
@@ -817,7 +817,7 @@ function Package (config) {
       }
       return to;
     },
-  
+
     /*
       http://www.{name}.com, {name: 'hey'} => http://www.hey.com
     */
@@ -829,12 +829,12 @@ function Package (config) {
         err.name = 'ValueError';
         return err;
       };
-    
+
       //  defaultTo :: a,a? -> a
       var defaultTo = function(x, y) {
         return y == null ? x : y;
       };
-      
+
       var lookup = function(obj, path) {
         if (!/^\d+$/.test(path[0])) {
           path = ['0'].concat(path);
@@ -845,11 +845,11 @@ function Package (config) {
         }
         return obj;
       };
-    
+
       var args = Array.prototype.slice.call(arguments, 1);
       var idx = 0;
       var state = 'UNDEFINED';
-      
+
       return template.replace(
         /([{}])\1|[{](.*?)(?:!(.+?))?[}]/g,
         function(match, literal, key, xf) {
@@ -872,7 +872,7 @@ function Package (config) {
             idx += 1;
           }
           var value = defaultTo('', lookup(args, key.split('.')));
-          
+
           if (xf == null) {
             return value;
           } else if (Object.prototype.hasOwnProperty.call(transformers, xf)) {
@@ -883,7 +883,7 @@ function Package (config) {
         }
       );
     },
-  
+
     transpose: function (arr) {
       return Object.keys(arr[0]).map(function(column) {
         return arr.map(function(row) { return row[column]; });
@@ -893,7 +893,7 @@ function Package (config) {
       var ordA = 'A'.charCodeAt(0);
       var ordZ = 'Z'.charCodeAt(0);
       var len = ordZ - ordA + 1;
-        
+
       var s = "";
       while(n >= 0) {
         s = String.fromCharCode(n % len + ordA) + s;
@@ -942,7 +942,7 @@ function Package (config) {
       title = title || "Temporary";
       return [this.new_(title, config)];
     }.bind(this);
-    
+
     var destroyTemp = function (tmp) {
       /*
         Interface with the drive api and delete the temporary file
@@ -957,7 +957,7 @@ function Package (config) {
         muteHttpExceptions: false
       });
     };
-    
+
     Import.ContextManager().apply(this, [func, {
       enter: makeTemp,
       exit: destroyTemp
@@ -971,7 +971,7 @@ function Package (config) {
 
     Import.ContextManager().apply(this, [func, {enter: makeTemp}]);
   },
-  
+
   fromId: function (spreadsheetId, config) {
     config = config || {};
     config.spreadsheetResource = Sheets.Spreadsheets.get(spreadsheetId);
