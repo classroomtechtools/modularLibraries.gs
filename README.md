@@ -1,27 +1,190 @@
 # modularLibraries.gs
 
-A Google Apps Script solution for library management. 
+A native Google Apps Script solution for library creation, usage, and development. 
 
-This repo consists of:
+This readme consists of:
 
-- Foundational code that enables modular libraries
-  - Import.gs provides the scaffolding needed for library usage and creation
-  - Requests.gs allows you to interact with Google APIs, external APIs
+- Documentation of how it works:
+    - The global `Import` namespace
+    - Package instantiation and namespacing
+    - How to write your own libraries following this pattern
+
 - Sample libraries which extends Google APIs, by using the foundational code above
+ 
+  - Sample HelloWorld library
+  - Requests.gs is a heavy wrapper around UrlFetchApp, which allows granular control of Google API interactions
   - Sheets.gs is a light wrapper around the Spreadsheet APIs
   - SheetsDB.gs extends Sheets.gs by introducing sessions
 
-All aspects are well documented, including tutorials.
+- How to write your own libraries
 
-## Quickstart
 
-To use the code here, the idea is to copy and paste from the Code section below into your project. A forthcoming package manager solution will automate this process. Note that some of these libraries have dependencies on other modular libraries.
+## Motivation
 
-Note that Import.gs isn't a typical "library" but is boilerplate code that enables the `Import` global and its functionality. The other libraries are built using that boilerplate.
+I love the Python/Github ecosphere but I have to use AppsScripts at work. In particular, **D**on't **R**epeat **Y**ourself. Be able to do reuse code that solves particular problems, but you only have to understand how to interact with it. The library should just encapsulate a particular functionality. 
+
+I use these libraries for several daily scripts and for AppMaker projects.
+
+## HelloWorld
+
+The sample HelloWorld library illustrates the essential features. Interact with it like this:
+
+```js
+function myFunction() {
+  var lib, chi;
+  lib = Import.HelloWorld();
+  lib.sayHi();  // Hello, World
+  chi = Import.HelloWorld.chinese({
+    noun: 'shijie'  // shijie = world in chinese
+  });
+  chi.sayHi();  // Ni hao, shijie
+}
+```
+
+## Documentation
+
+### Terms
+
+The library is the code that the library writer exposes to the end developer. The package is the wrapped library. We have to instantiate the package in order to get a library instance. The package can accept configuration settings which are passed to the library, and the package can also derive namespaces. These are explained below.
+
+
+### The `Import` namespace
+
+When you use any of the modular libraries in this repo, you gain the the `Import` global variable which acts as a namespace to access the library you pasted in. Any library pasted in will add a property onto the `Import` variable, and is the entry point to accessing and interacting with the target library. The name of the property added is defined in the library itself in the packaging code (#2 below in "Anatomy of a Library).
+
+The library references are only guaranteed to be available in the `Import` namespace from within a function that is called in the editor, or invoked through triggers, etc.
+
+#### Using `Import` Examples
+
+Copying and pasting a SampleLibrary.gs example:
+
+```js
+function MyFunction () {
+    var lib, ss;
+    
+    // instantiate a package with default settings
+    lib = Import.SampleLibrary();
+    lib.sayHi();  // 'hi'
+
+    // instantiate a package with passed configuration (long form)
+    lib = Import.SampleLibrary({
+        config: {
+            lang: 'ch'
+        }
+    });
+    lib.sayHi();  // 'ni hao'
+
+    // instantiate a package from a creator method (short form)
+    lib = Import.SampleLibrary.create({
+        lang: 'ch'
+    });
+    lib.sayHi();  // 'ni hao'
+        
+    // instantiate a package from a creator method
+    ss = Import.SampleLibrary.fromId('<spreadsheetId>');
+    ss.withSheet('Sheet1', function (sheet) {
+        sheet.write('B3', ['b3']);
+        sheet.write('B4', ['b4']);
+    });    
+}
+```
+
+
+
+### Anatomy of a Library
+
+All libraries can only be one file long. They all follow a boilerplate pattern, and any of them will provide the project in which they are copied into with the global `Import` variable. 
+
+A modularLibrary.gs library, in code, consists of:
+
+1. `(function (global, name, Package, helpers, creators) { /* code */ } (this, `
+2. `"SampleLibrary",`
+3. `function Package_(config) { return {}; },`
+4. `{ /* helpers */ },`
+5. `{ /* creators */ }`
+6. `)`
+
+Explanation:
+
+1. The first part is the Import.gs code that gives the project the `Import` global. The `/* code */` portion is about 50 lines of code that can be found in the package. Notice that trailing `(this,` which gets passed as the `global` parameter in the anonymous function. This is how Import.gs gains access to the global context.
+2. The name of the package, which is used to expose the entry point into the library in the project as `Import.SampleLibrary`. This is passed to Import.gs in the `name` variable.
+3. The package itself, which is just a function that takes one variable, `config`. When the entry point to the library is invoked, such as `Import.SampleLibrary({config: {}})` this function is run with `this` keyword referring to itself and contents of `config` are passed to it.
+4. The first of two convenience functions: helper functions. These are intended to be functions that are self-contained that the package itself uses to implement its features, but also intended to be exposed to the project as well. These functions have no access to the library or to any of the other entry points, for these are on the library instance, or `Import.SampleLibrary().helper()`. 
+5. The second of two convenience functions: the creators. These are methods that are used to instantiate the library itself, such as `Import.SampleLibrary.create`
+
+### Instantiation
+
+Using these libraries requires the developer to copy and paste into their project. Then, you use either `Import.SampleLibrary` that resolved into a library reference, or `Import.SampleLibrary({config:{}})` that returns a library instance initiated with configuration options, which is how libraries expose its features and APIs.
+
+Libraries can define convenient methods for instantiation. These **creator methods** are a convienient method that lives on the top-level library reference. They are typically called `.fromX` or just `.create`. For example:
+
+```js
+var ss = Import.Sheets.fromId('<spreadsheetid>');
+var ce = Import.CustomErrors.create('Custom Error');
+```
+
+These creator methods are the preferred way to instantiate things. The first one creates an object and have a longer-form equivalents:
+
+```js
+var ss = Import.Sheets({
+  config: {
+    spreadsheetId: '<spreadsheetid>'
+  }
+});
+var ce = Import.CustomErrors({
+  config: {
+    name: 'Custom Error'
+  }
+});
+```
+
+An important concept is remembering a **library reference** is what is provided as a property of the `Import` global. There is nothing exposed there except for creator functions. The developer writing a creator has the `this` keyword which is itself a library reference. When you invoke (or call) the library reference you end up with a **library instance** which exposes the core functionality (usually with an object, but can be anything). The developer writing the library returns that object in the Package function.
+
+### Configuration Options
+
+
+
+### Namespacing 
+
+The `Import` variable also has other powers: You can build namespaces with it for use in your application:
+
+```js
+var app = {};
+app.libraries = {};
+Import.SampleLibrary({
+  base: app.libraries,
+  attr: lib1,
+  config: {}
+});
+Import.OtherLibrary({
+  base: app.libraries,
+  attr: lib2,
+  config: {}
+});
+```
+
+Now you have `app.libraries.lib1` and `app.libraries.lib2`.
+
+An interesting feature of namespace though, is that you can actually define global variables if you choose to do so. You do that using the `namespace` property.
+
+```js
+Import.SampleLibrary({
+  namespace: 'app.libraries.lib1',
+  config: {}
+});
+```
+
+The `config` property is passed to the library itself as the first parameter in the library definition. 
+
+## Writing a library
+
+### Helper methods
+
+The other kind of convenient methods are *helper methods* that live on the library instance and are availble from within the library code as well. This is how developers can write a useful function inside their package and expose it to the end developer. For example the CustomErrors.gs library contains a useful function that it uses to derive stack information, which it uses to provide features. It is exposed as a helper function
 
 ## Code
 
-### Foundational:
+### Foundational Libraries:
 
 Import.gs below is intended to be used as framework for writing a library, and Requests.gs is a very versatile library for interacting with endpoints, including Google ones.
 
@@ -33,7 +196,7 @@ A Google Apps Script solution to writing and using modular libraries so that app
 
 A modular library for Google Apps Scripting wrapping `UrlFetchApp`. It also has support for interacting with Google APIs via the Discovery service, and support for concurrent processing. [[Link](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Requests)]
 
-### Testing and Debugging:
+### Testing and Debugging Libraries:
 
 Ideally modular libraries need to have unit tests that come along with the project. Tests are useful for building out improvements, and can even serve as useful insight into how the library works.
 
