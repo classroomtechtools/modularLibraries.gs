@@ -926,9 +926,9 @@ function Package (config) {
               key = String(idx);
               idx += 1;
             }
-            var value = defaultTo('', lookup(args, key.split('.')));
+            var value = lookup(args, key.split('.'));
             if (xf == null) {
-              return value;
+              return '<' + value + '> (' + typeof value + ')';
             } else if (Object.prototype.hasOwnProperty.call({}, xf)) {
               return config.transformers[xf](value);
             } else {
