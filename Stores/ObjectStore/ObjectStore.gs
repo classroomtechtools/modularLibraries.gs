@@ -6,6 +6,7 @@ function ObjectStorePackage_ (config) {
   config = config || {};
   config.expiry = config.expiry || 'max';
   config.which = config.which ? config.which.toLowerCase() : 'script';
+  config.jsons = typeof config.jsons === 'undefined' ? true : config.jsons;
   var self = this;
 
   /* we'll use two seperate variables to interface with the cache, since one of them is going be jsons
@@ -32,7 +33,8 @@ function ObjectStorePackage_ (config) {
     },
     set: function (key, value) {
       var matches, storeKeys, newValues;
-      value = JSON.stringify(value);
+      if (config.jsons)
+        value = JSON.stringify(value);
       matches = value.match(/.{1,65500}/g);
       if (matches.length > 999) throw Error("Your object is too rich for my blood. Consider breaking it down further somehow");
 
@@ -89,7 +91,10 @@ function ObjectStorePackage_ (config) {
         }
       }
 
-      return JSON.parse(result || 'null');
+      if (config.jsons) 
+        return JSON.parse(result || 'null');
+      else
+        return result || null;
     },
     append: function (key, listToAppend) {
       var obj;
@@ -115,6 +120,13 @@ function ObjectStorePackage_ (config) {
   }
 },
 
-{}
+{
+  withUserCache: function (options) {
+    options = options || {};
+    options.config = {which: 'user'};
+    return this(options);
+  }
+}
 
 );
+
