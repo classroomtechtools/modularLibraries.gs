@@ -72,7 +72,22 @@ Our school, like most organizations, utilizes Organizational Units (OU — a te
 
 AppMaker has another useful feature, the `Directory` datasource, but sadly this does not include organizational unit information.
 
-So therefore I decided to write the [OuService](https://github.com/classroomtechtools/modularLibraries.gs/tree/master/Examples/OuService) script that runs as a web app externally to the AppMaker instances, thus accessible from within an AppMaker server-side script (not client-side due to CORS limitation).
+So therefore I decided to write the [OuService](https://github.com/classroomtechtools/modularLibraries.gs/tree/master/Examples/OuService) script that runs as a web app externally to the AppMaker instances, thus accessible from within an AppMaker server-side script, though not client-side (due to CORS limitation). Since I will want to be able to invoke from the client-side, I'll need to implement a server-side script that can be called with `google.script.run`:
+
+```js
+function getOu(email) {
+  var response;
+  try {
+    response = UrlFetchApp.fetch('https://script.google.com/a/YOURWEBURL/exec?secret=YOURSECRET&user=' + email);
+  } catch (e) {
+    console.log(e.message);
+    return null;
+  }
+  response = JSON.parse(response);
+  return response.orgUnitPath.split('/')[1]; // TODO handle errors
+}
+```
+
 
 Now that I've exposed the data, I have to figure out how to utilize it from within AppMaker, thus the next question.
 
@@ -116,7 +131,7 @@ function GetSettings(query) {
 }
 ```
 
-This all comes together in the onAppLoad function that is invoked at application launch `AppSettings:OnAppStart`. The following code is necessary to ensure the `Settings` datastore contains one record associated to the logged-in user, and that the datastores have `SettingsKey` set (assuming that it has already been manually added as a property in the datastore):
+This all comes together in the `onAppLoad` function that is invoked at application launch `AppSettings:OnAppStart`. The following code is necessary to ensure the `Settings` datastore contains one record associated to the logged-in user, and that the datastores have `SettingsKey` set (assuming that it has already been manually added as a property in the datastore):
 
 ```js
 function SetUpSettings(loader) {
