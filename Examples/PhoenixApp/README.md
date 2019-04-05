@@ -70,7 +70,9 @@ This is a great feature, except that in my case:
 
 Our school, like most organizations, utilizes Organizational Units (OU — a term that is derived from LDAP) and is stored in GSuite and is accessible [via an API](https://developers.google.com/admin-sdk/directory/v1/guides/manage-org-units). With AppsScripts, you can use `AdminDirectory.Users.get` [method](https://developers.google.com/admin-sdk/directory/v1/reference/users/get) to retrieve this info. As both a practical matter and in terms of best practices, it was imperative that I figure out how to use the OUs as the source of truth to know what role the user was to have.
 
-The solution was to write an [OuService](https://github.com/classroomtechtools/modularLibraries.gs/tree/master/Examples/OuService) script that runs as a web app, thus accessible from within an AppMaker instance.
+AppMaker has another useful feature, the `Directory` datasource, but sadly this does not include organizational unit information.
+
+So therefore I decided to write the [OuService](https://github.com/classroomtechtools/modularLibraries.gs/tree/master/Examples/OuService) script that runs as a web app externally to the AppMaker instances, thus accessible from within an AppMaker server-side script (not client-side due to CORS limitation).
 
 Now that I've exposed the data, I have to figure out how to utilize it from within AppMaker, thus the next question.
 
@@ -89,7 +91,13 @@ Now that I have a way to call a service to get the required information, we need
 
 I solved this by creating a `Settings` datastore, and set it up on the `onAppLoad` trigger. 
 
-When the application loads up, loading is suspended and, if required, creates a record that contains the user's email address field, and any settings fields (such as `ProtectData` boolean and `Ou` string). In that way we guarantee that there is one and only one record in Settings for each application user.
+When the application loads up, loading is suspended and, if required, creates a record that has for the `UserEmail` field the user's email address field, and any settings fields (such as `ProtectData` boolean and `Ou` string). In that way we guarantee that there is one and only one record in Settings for each application user:
+
+```js
+// App:Datastores:Settings:queryRecords
+query.filters.UserEmail._equals = query.parameters.UserEmail;
+return query.run();
+```
 
 Processing continues by running looping all of the application's datastores available at `app.datastores` and seeing if there is a `SettingsKey` property available on it. If so, it sets it to the `_key` of that unique record. In that way, all of my calculated datastores which is responsible for fetching the raw information has access to information about the currently enrolled user.
 
@@ -108,10 +116,54 @@ function GetSettings(query) {
 }
 ```
 
-I can also use it in a binding:
+This all comes together in the onAppLoad function that is invoked at application launch `AppSettings:OnAppStart`. The following code is necessary to ensure the `Settings` datastore contains one record associated to the logged-in user, and that the datastores have `SettingsKey` set (assuming that it has already been manually added as a property in the datastore):
 
 ```js
-// Label:Display:visible
-@datastores.Settings.item.Ou === 'Staff'
-```
+function SetUpSettings(loader) {
+  var settingsKey = app.datasources.Settings.item._key;
+  Object.keys(app.datasources).filter(function (key) {
+    return key.indexOf('_') !== 0;  // weed out internal properties
+  }).forEach(function (name) {
+    var ds;
+    ds = app.datasources[name];
+    if (ds.properties && ds.properties.hasOwnProperty('SettingsKey'))
+      ds.properties.SettingsKey = settingsKey;
+  });
+  loader.resumeLoad();
+}
 
+function onAppLoad(loader) {
+  loader.suspendLoad();
+  app.datasources.Settings.properties.UserEmail = app.user.email;
+  app.datasources.Settings.load(function () {
+    // first time this user launched this app
+    var create, draft;
+    var response, record, ou;
+    if (app.datasources.Settings.items.length === 0) {
+      create = app.datasources.AllSettings.modes.create;
+      draft = create.item;
+      draft.UserEmail = app.user.email;
+      draft.ProtectData = false;
+      google.script.run
+        .withSuccessHandler(function (ou) {
+        if (!ou) {
+          console.log("Did not get ou");
+          SetUpSettings(loader);
+          return;
+        }
+        draft.Ou = ou;
+        create.createItem(function (record) {
+          app.datasources.Settings.load(function () {
+            // record created, now we're all good to continue
+            SetUpSettings(loader);
+          });
+        });
+      })
+        .getOu(app.user.email);
+    } else {
+      // already set up, continue
+      SetUpSettings(loader);
+    }
+  });
+}
+```
