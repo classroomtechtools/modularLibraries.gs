@@ -104,9 +104,9 @@ Now that I have a way to call a service to get the required information, we need
 @user.role.Admin
 ```
 
-I solved this by creating a `Settings` datastore, and set it up on the `onAppLoad` trigger. 
+I solved this by creating a `Settings` datastore that has special setup in `AppSettings:onAppStart`.
 
-When the application loads up, loading is suspended and, if required, creates a record that has for the `UserEmail` field the user's email address field, and any settings fields (such as `ProtectData` boolean and `Ou` string). In that way we guarantee that there is one and only one record in Settings for each application user:
+When the application loads up, loading is suspended and, if required, creates a record that has for the `UserEmail` field the user's email address field, and any settings fields (such as `ProtectData` boolean and `Ou` string). In that way we guarantee that there is one and only one record in Settings for each application user, for whenever `Settings` is loaded during the application interactions with the user, it runs this:
 
 ```js
 // App:Datastores:Settings:queryRecords
@@ -114,7 +114,7 @@ query.filters.UserEmail._equals = query.parameters.UserEmail;
 return query.run();
 ```
 
-Processing continues by running looping all of the application's datastores available at `app.datastores` and seeing if there is a `SettingsKey` property available on it. If so, it sets it to the `_key` of that unique record. In that way, all of my calculated datastores which is responsible for fetching the raw information has access to information about the currently enrolled user.
+Additional setup is required, though, to provide access to `Settings` in server-side scripts. So at application startup, we loop through all of the application's datastores available at `app.datastores` and seeing if there is a `SettingsKey` property available on it. If so, it sets it to the `_key` of that unique record. In that way, all of my calculated datastores which is responsible for fetching the raw information has access to information about the currently enrolled user. For example:
 
 ```js
 // inside Calculated datastore
@@ -131,7 +131,7 @@ function GetSettings(query) {
 }
 ```
 
-This all comes together in the `onAppLoad` function that is invoked at application launch `AppSettings:OnAppStart`. The following code is necessary to ensure the `Settings` datastore contains one record associated to the logged-in user, and that the datastores have `SettingsKey` set (assuming that it has already been manually added as a property in the datastore):
+This all comes together in the below `onAppLoad` function that is invoked at application launch `AppSettings:OnAppStart`. The following code is necessary to ensure the `Settings` datastore contains one record associated to the logged-in user, and that the datastores have `SettingsKey` set (assuming that it has already been manually added as a property in the datastore). In addition to needing a `Settings` datastore, you also need an `AllSettings` datastore, which is from the same datasource (but without any query script — it's just used to create):
 
 ```js
 function SetUpSettings(loader) {
