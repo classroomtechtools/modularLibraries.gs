@@ -4,7 +4,7 @@ Make the temporary storage of very large objects in apps scripting a cinch.
 
 ## ObjectStore Quickstart
 
-Copy the [code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Stores/ObjectStore/ObjectStore.gs) and [its dependency](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Stores/CacheStore/CacheStore.md) into your project. Store and retrieve very large jsons into the store.
+Copy the [code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Stores/ObjectStore/ObjectStore.gs) and [its dependency](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Stores/CacheStore/) into your project. Store and retrieve very large jsons into the store.
 
 ```js
 store = Import.ObjectStore();
