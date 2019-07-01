@@ -28,4 +28,3 @@ Implements the following, left side is API call and right side is [function equi
 - **getKeys**: getKeys
 - **remove**: deleteProperty
 - **removeAll**: deleteAllProperties
-
