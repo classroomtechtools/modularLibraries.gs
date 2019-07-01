@@ -57,6 +57,16 @@ function PropertyStorePackage_ (config) {
 
 { /* helpers */ },
 
-{}
+{
+  user: function () {
+    return this({config:{which: 'user'}});
+  },
+  document: function () {
+    return this({config:{which: 'document'}});
+  },
+  script: function () {
+    return this({config:{which: 'script'}});
+  }
+}
 
 );
