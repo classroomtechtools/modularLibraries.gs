@@ -13,7 +13,7 @@ By default it uses scripts property services, but you can use user or document s
 
 ```js
 var userStore = Import.PropertyStore.user();
-var docStore = Import.PropertyStore.user();
+var docStore = Import.PropertyStore.document();
 ```
 
 ### API:
