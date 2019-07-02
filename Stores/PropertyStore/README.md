@@ -2,8 +2,12 @@
 
 Light wrapper to PropertyServices. Supports json values. Unlike the target API, does not support chaining.
 
+## Quickstart
+
+Copy the [code](https://github.com/classroomtechtools/modularLibraries.gs/blob/master/Stores/PropertyStore/PropertyStore.gs) into your project as a standalone file. Start using it:
+
 ```js
-var store = Import.PropertyStore();  // default is script store
+var store = Import.PropertyStore();  // default is script properties
 store.set('key', {obj: "object"});
 obj = store.get('key');
 obj  // is {obj: "object"}
