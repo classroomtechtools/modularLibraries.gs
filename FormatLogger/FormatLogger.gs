@@ -140,7 +140,7 @@ function FormatLoggerPackage_ (config) {
               if (m)
                 result = m[1];
               else
-                result = 'Function';
+                result = this.constructor.name;   // it's an ES6 class, use name of constructor
               break;
           }
           break;
